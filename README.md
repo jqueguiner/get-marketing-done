@@ -134,6 +134,18 @@ Continuity policy checks:
 - Invalid top resume source falls back with structured warnings.
 - State schema remains backward-compatible with additive provenance metadata.
 
+Verification gate consistency:
+
+```bash
+node scripts/verify_quality_gate_consistency.js
+```
+
+Verification gate policy checks:
+- Claude and Codex both block send-adjacent prepare actions when verification is missing.
+- Blocked payloads match contract (`QUALITY_GATE_BLOCKED`, `failed_gates`, `remediation`).
+- Prepare action is allowed after verification state preconditions are satisfied.
+- Any mismatch or bypass exits non-zero and should block merge/release.
+
 ### Core Workflow
 
 | Command | Arguments | Example |
