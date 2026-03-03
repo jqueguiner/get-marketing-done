@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Claude Adapter Parity Refactor** - Refactor existing Claude integration onto shared adapter interface without regressions (completed 2026-03-03)
 - [x] **Phase 4: Cross-Adapter State Continuity** - Ensure pause/resume/progress behavior and persisted state compatibility across adapters (completed 2026-03-03)
 - [x] **Phase 5: Verification Gate Consistency** - Enforce manual verification and safety gates uniformly for every adapter (completed 2026-03-03)
-- [ ] **Phase 6: Parity Test Harness** - Add compatibility checks for key command/state/output paths
+- [x] **Phase 6: Parity Test Harness** - Add compatibility checks for key command/state/output paths (completed 2026-03-03)
 - [ ] **Phase 7: Additional Adapter Scaffolds** - Add Gemini/OpenCode/Mistral-compatible scaffolds against shared contracts
 - [ ] **Phase 8: Docs and Migration Guide** - Publish compatibility matrix, setup docs, and migration notes
 
@@ -101,7 +101,7 @@ Plans:
   1. Parity checks compare command outcomes and state transitions between adapters
   2. Key flows (init, progress, pause/resume, send-prepare) are covered
   3. Mismatches fail checks with precise diagnostics
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 06-01-PLAN.md -- Build adapter parity test runner and fixtures
@@ -147,6 +147,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Claude Adapter Parity Refactor | 2/2 | Complete   | 2026-03-03 |
 | 4. Cross-Adapter State Continuity | 2/2 | Complete   | 2026-03-03 |
 | 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
-| 6. Parity Test Harness | 1/2 | In Progress|  |
+| 6. Parity Test Harness | 2/2 | Complete   | 2026-03-03 |
 | 7. Additional Adapter Scaffolds | 0/2 | Not started | — |
 | 8. Docs and Migration Guide | 0/2 | Not started | — |
