@@ -77,6 +77,8 @@ Every step builds on the last. Results feed back to the beginning.
 | 2 | `/gmd:market-problems-deep-research <topic>` | Research market problems and what leaders are saying |
 | 3 | `/gmd:data-points-builder define` | Define what signals to collect per company |
 | 4 | `/gmd:table-enrichment run <campaign>` | Enrich companies with those signals |
+| 5 | `/gmd:crm-connect import` | Import companies and contacts from HubSpot CRM |
+| 6 | `/gmd:segmentation create` | Segment companies by signals, industry, or custom criteria |
 | 7 | `/gmd:email-generation create-template` | Define email formula and generate personalized emails |
 | 8 | `/gmd:copy-feedback <company>` | Simulate how a prospect would react to your email |
 | 9 | `/gmd:run-instantly prepare <campaign>` | Upload to Instantly, verify before sending |
@@ -100,6 +102,8 @@ Every step builds on the last. Results feed back to the beginning.
 | `table-enrichment` | `run <campaign>`, `status`, `validate` | `/gmd:table-enrichment status` |
 | `email-generation` | `create-template`, `generate <company>`, `bulk-generate <segment>`, `iterate` | `/gmd:email-generation bulk-generate fintech` |
 | `copy-feedback` | `<company or person>` | `/gmd:copy-feedback "Jane Smith at Acme"` |
+| `crm-connect` | `preview`, `import`, `status` | `/gmd:crm-connect preview` |
+| `segmentation` | `create`, `assign`, `review`, `auto` | `/gmd:segmentation auto` |
 | `run-instantly` | `prepare <campaign>`, `upload <campaign>`, `verify <campaign>`, `results <campaign>` | `/gmd:run-instantly prepare q1-fintech` |
 
 ### Session Management
@@ -111,6 +115,7 @@ Every step builds on the last. Results feed back to the beginning.
 | `/gmd:report-server start` | Launch a local browser dashboard at `http://127.0.0.1:8487` |
 | `/gmd:pause-work <reason>` | Save state for cross-session persistence |
 | `/gmd:resume-work` | Restore state and route to the next action |
+| `/gmd:update` | Update GMD to latest version |
 
 ---
 
