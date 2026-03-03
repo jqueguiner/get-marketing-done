@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-03T23:43:15Z"
+last_updated: "2026-03-03T23:45:39Z"
 progress:
   total_phases: 8
   completed_phases: 6
@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 7 of 8 (Additional Adapter Scaffolds)
-Plan: 0 of 2 in current phase
-Status: Phase 6 executed and verified -- ready for Phase 7 discussion/planning
-Last activity: 2026-03-03 -- Phase 6 complete (2/2 plans, verification passed)
+Plan: 2 planned (0 executed) in current phase
+Status: Phase 7 planned -- ready for Phase 7 execution
+Last activity: 2026-03-03 -- Phase 7 planning complete (2 plans validated)
 
 Progress: [███████░░░] 75%
 
@@ -46,7 +46,7 @@ Progress: [███████░░░] 75%
 | 04-cross-adapter-state-continuity | 2/2 | ~25min | ~12min |
 | 05-verification-gate-consistency | 2/2 | ~22min | ~11min |
 | 06-parity-test-harness | 2/2 | ~20min | ~10min |
-| 07-additional-adapter-scaffolds | 0/2 | — | — |
+| 07-additional-adapter-scaffolds | 0/2 | — | — (planned) |
 | 08-docs-and-migration-guide | 0/2 | — | — |
 
 *Updated after each plan completion*
@@ -80,6 +80,7 @@ Recent decisions affecting current work:
 - [Plan P6]: Execution split into parity orchestrator foundation (wave 1) then critical flow smoke + requirement closure artifacts (wave 2)
 - [Execute P6]: Parity orchestrator and command-flow smoke suite added; CMD-01, QUAL-01, and QUAL-02 closed with passing verification evidence
 - [Discuss P7]: Scaffold providers locked to minimal command maps, hard-fail unknowns, config-gated activation, and structured capability-gap diagnostics
+- [Plan P7]: Execution split into scaffold registration/gating (wave 1) then scaffold conformance validation + readiness evidence (wave 2)
 
 ### Roadmap Evolution
 
@@ -102,6 +103,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 7 discussion complete
-Resume file: .planning/phases/07-additional-adapter-scaffolds/07-CONTEXT.md
-Next: $gsd-plan-phase 7
+Stopped at: Phase 7 planning complete
+Resume file: .planning/phases/07-additional-adapter-scaffolds/07-02-PLAN.md
+Next: $gsd-execute-phase 7
