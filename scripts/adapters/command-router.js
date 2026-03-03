@@ -109,6 +109,7 @@ function routeCommand(input) {
     params: params,
     metadata: {
       provider: provider,
+      canonical_action: action,
       source: sourceKind || 'native',
       conflict_policy: providerCapabilities.conflict_policy
     }

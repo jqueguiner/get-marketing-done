@@ -642,6 +642,101 @@ function configEnsure() {
   return config;
 }
 
+// ─── Quality Gate Enforcement ───
+
+var GATED_ACTIONS = Object.freeze({
+  'outreach.prepare': true,
+  'outreach.upload': true
+});
+
+var COMMAND_GATE_ACTION_MAP = Object.freeze({
+  'init-outreach': 'outreach.prepare',
+  'mark-uploaded': 'outreach.upload'
+});
+
+function inferGateAction(opts) {
+  if (opts && opts.action && GATED_ACTIONS[opts.action]) return opts.action;
+  var command = opts && opts.command ? opts.command : null;
+  return COMMAND_GATE_ACTION_MAP[command] || null;
+}
+
+function getCommandCampaign(args) {
+  if (!Array.isArray(args) || args.length === 0) return null;
+  var first = args[0];
+  if (typeof first !== 'string') return null;
+  var trimmed = first.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function buildGateBlockedResponse(opts) {
+  return {
+    error: 'Quality gate blocked command execution',
+    code: 'QUALITY_GATE_BLOCKED',
+    provider: opts.provider,
+    command: opts.command,
+    gated_action: opts.gatedAction,
+    failed_gates: opts.failedGates,
+    remediation: opts.remediation
+  };
+}
+
+function evaluateQualityGates(opts) {
+  var config = opts.config || {};
+  var quality = config.quality_gates || {};
+  var state = opts.state || {};
+  var gateAction = inferGateAction({ action: opts.action, command: opts.command });
+
+  if (!gateAction) return { allowed: true, gated_action: null, failed_gates: [], remediation: [] };
+
+  var failedGates = [];
+  var remediation = [];
+
+  if (quality.manual_verify_before_send) {
+    var campaign = getCommandCampaign(opts.args);
+    var hasVerification = Boolean(state.last_verified_at);
+    if (!hasVerification) {
+      failedGates.push({
+        gate: 'manual_verify_before_send',
+        reason: 'verification_missing',
+        detail: 'No successful verification recorded in STATE frontmatter.'
+      });
+    } else if (campaign && state.last_verified_campaign && state.last_verified_campaign !== campaign) {
+      failedGates.push({
+        gate: 'manual_verify_before_send',
+        reason: 'campaign_mismatch',
+        detail: 'Last verified campaign does not match target campaign.'
+      });
+    } else if (campaign && !state.last_verified_campaign) {
+      failedGates.push({
+        gate: 'manual_verify_before_send',
+        reason: 'campaign_untracked',
+        detail: 'Verification timestamp exists but verified campaign is not recorded.'
+      });
+    }
+
+    if (failedGates.length > 0) {
+      remediation.push('Run: node scripts/marketing-tools.js verify <campaign>');
+      remediation.push('Confirm verify status is `passed` and retry the blocked command.');
+    }
+  }
+
+  if (failedGates.length === 0) {
+    return {
+      allowed: true,
+      gated_action: gateAction,
+      failed_gates: [],
+      remediation: []
+    };
+  }
+
+  return {
+    allowed: false,
+    gated_action: gateAction,
+    failed_gates: failedGates,
+    remediation: remediation
+  };
+}
+
 // ─── DB Pass-through ───
 
 var DB_COMMANDS = [
@@ -735,6 +830,7 @@ function main() {
   var cmd = args[0];
   var cmdArgs = args.slice(1);
   var provider = getRuntimeProvider();
+  var resolvedAction = null;
 
   if (!cmd || cmd === 'help') {
     console.log(JSON.stringify({
@@ -764,6 +860,7 @@ function main() {
       process.exit(1);
     }
     if (routed && ACTION_TO_COMMAND[routed.action] && (ACTION_TO_COMMAND[routed.action] in COMMANDS)) {
+      resolvedAction = routed.action;
       cmd = ACTION_TO_COMMAND[routed.action];
     } else {
       console.error(JSON.stringify({
@@ -777,7 +874,41 @@ function main() {
     }
   }
 
+  var currentConfig = readJSON(CONFIG_PATH) || {};
+  var currentState = parseStateFrontmatter(readFile(STATE_PATH));
+  var gateResult = evaluateQualityGates({
+    provider: provider,
+    command: cmd,
+    action: resolvedAction,
+    args: cmdArgs,
+    config: currentConfig,
+    state: currentState
+  });
+
+  if (!gateResult.allowed) {
+    console.error(JSON.stringify(buildGateBlockedResponse({
+      provider: provider,
+      command: cmd,
+      gatedAction: gateResult.gated_action,
+      failedGates: gateResult.failed_gates,
+      remediation: gateResult.remediation
+    }), null, 2));
+    process.exit(1);
+  }
+
   var result = COMMANDS[cmd](cmdArgs);
+
+  if (cmd === 'verify') {
+    var targetCampaign = cmdArgs[0] || null;
+    if (targetCampaign && result && result.status === 'passed') {
+      stateSet('last_verified_campaign', targetCampaign);
+      stateSet('last_verified_at', now());
+      result.gate_recorded = {
+        campaign: targetCampaign,
+        verified_at: stateGet('last_verified_at').last_verified_at
+      };
+    }
+  }
   var output = JSON.stringify(result, null, 2);
 
   // Large payload handling: write to temp file
