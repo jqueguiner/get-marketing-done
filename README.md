@@ -97,10 +97,19 @@ Every step builds on the last. Results feed back to the beginning.
 - Canonical aliases are available in adapter mode using `gmd:<action>`.
 - Alias mode is opt-in (disabled by default).
 - On collisions, native commands take precedence and alias routing warns.
+- Codex-native surface is strict `$gmd-*` only.
+- Unmapped Codex native commands hard-fail with a clear error.
 
 Examples:
 - Claude-native: `/gmd:campaign-progress`
+- Codex-native: `$gmd-campaign-progress`
 - Canonical alias (with alias mode enabled): `gmd:campaign.progress`
+
+Codex command sweep:
+
+```bash
+node scripts/verify_codex_command_sweep.js
+```
 
 ### Core Workflow
 
