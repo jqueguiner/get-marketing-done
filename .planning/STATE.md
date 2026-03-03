@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-03T18:35:00Z"
+last_updated: "2026-03-03T18:48:00Z"
 progress:
   total_phases: 8
   completed_phases: 2
@@ -24,8 +24,8 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 Phase: 3 of 8 (Claude Adapter Parity Refactor)
 Plan: 0 of 2 in current phase
-Status: Phase 2 executed and verified -- ready for Phase 3 discussion/planning
-Last activity: 2026-03-03 -- Phase 2 complete (2/2 plans, verification passed)
+Status: Phase 3 context captured -- ready for planning
+Last activity: 2026-03-03 -- Phase 3 discussion complete (`03-CONTEXT.md` created)
 
 Progress: [██░░░░░░░░] 25%
 
@@ -68,6 +68,7 @@ Recent decisions affecting current work:
 - [Discuss P2]: Codex native surface locked to `$gmd-*` only, unmapped commands hard-fail, full wiring required, full command sweep required
 - [Execute P2]: Unknown Codex native commands now emit `UNKNOWN_CODEX_COMMAND` with structured routing error output
 - [Execute P2]: Full command sweep validator added and passing (16/16 `$gmd-*` commands)
+- [Discuss P3]: Claude parity locked to last tagged release baseline; hybrid strict/semantic checks; no user-visible behavior changes; block on any regression
 
 ### Roadmap Evolution
 
@@ -86,6 +87,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 2 complete and verified
-Resume file: .planning/phases/02-codex-adapter-foundation/02-VERIFICATION.md
-Next: $gsd-discuss-phase 3
+Stopped at: Phase 3 discussion complete
+Resume file: .planning/phases/03-claude-adapter-parity-refactor/03-CONTEXT.md
+Next: $gsd-plan-phase 3
