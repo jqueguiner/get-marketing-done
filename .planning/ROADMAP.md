@@ -90,8 +90,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 05-01-PLAN.md -- Centralize verification gate policy in shared core
-- [ ] 05-02-PLAN.md -- Enforce adapter compliance with gate policy hooks
+- [x] 05-01-PLAN.md -- Centralize verification gate policy in shared core
+- [x] 05-02-PLAN.md -- Enforce adapter compliance with gate policy hooks
 
 ### Phase 6: Parity Test Harness
 **Goal**: Add parity checks for command behavior and key workflow outputs across supported adapters
@@ -146,7 +146,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. Codex Adapter Foundation | 2/2 | Complete    | 2026-03-03 |
 | 3. Claude Adapter Parity Refactor | 2/2 | Complete   | 2026-03-03 |
 | 4. Cross-Adapter State Continuity | 2/2 | Complete   | 2026-03-03 |
-| 5. Verification Gate Consistency | 2/2 | Complete   | 2026-03-03 |
+| 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
 | 6. Parity Test Harness | 0/2 | Not started | — |
 | 7. Additional Adapter Scaffolds | 0/2 | Not started | — |
 | 8. Docs and Migration Guide | 0/2 | Not started | — |
