@@ -111,6 +111,17 @@ Codex command sweep:
 node scripts/verify_codex_command_sweep.js
 ```
 
+Claude parity gate (baseline = latest tagged release, currently `v1.1.1`):
+
+```bash
+node scripts/verify_claude_parity.js
+```
+
+Parity policy:
+- `progress` and `verify` enforce strict key fields.
+- Non-critical structures are checked semantically.
+- Any regression fails the validator and blocks phase completion.
+
 ### Core Workflow
 
 | Command | Arguments | Example |
