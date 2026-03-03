@@ -260,7 +260,8 @@ const SKILL_NAMES = [
   'company-context-builder', 'list-building', 'market-problems-deep-research',
   'data-points-builder', 'table-enrichment', 'email-generation',
   'copy-feedback', 'run-instantly', 'campaign-progress', 'campaign-verify',
-  'pause-work', 'resume-work',
+  'pause-work', 'resume-work', 'crm-connect', 'segmentation',
+  'update', 'report-server',
 ];
 
 /**

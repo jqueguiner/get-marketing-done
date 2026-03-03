@@ -108,6 +108,7 @@ Every step builds on the last. Results feed back to the beginning.
 |---------|--------------|
 | `/gmd:campaign-progress` | Visual pipeline dashboard — what's done, what's next |
 | `/gmd:campaign-verify <campaign>` | Verify campaign readiness (exists / substantive / wired) |
+| `/gmd:report-server start` | Launch a local browser dashboard at `http://127.0.0.1:8487` |
 | `/gmd:pause-work <reason>` | Save state for cross-session persistence |
 | `/gmd:resume-work` | Restore state and route to the next action |
 
