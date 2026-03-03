@@ -8,14 +8,14 @@
 ### Adapter Foundation
 
 - [x] **ADPT-01**: Operator can run the same canonical workflow actions through a Codex-compatible command adapter.
-- [ ] **ADPT-02**: Operator can run existing Claude workflow commands without behavioral regression after adapter refactor.
+- [x] **ADPT-02**: Operator can run existing Claude workflow commands without behavioral regression after adapter refactor.
 - [x] **ADPT-03**: Maintainer can define assistant capability metadata in one support matrix used by adapters.
 
 ### Command and Workflow Parity
 
 - [ ] **CMD-01**: Operator can invoke core GTM pipeline steps with consistent state transitions across supported adapters.
 - [ ] **CMD-02**: Operator can resume paused work from persisted state even when switching assistant frontends.
-- [ ] **CMD-03**: Operator can run campaign progress/verification commands with equivalent outputs across adapters.
+- [x] **CMD-03**: Operator can run campaign progress/verification commands with equivalent outputs across adapters.
 
 ### Integration and State Safety
 
@@ -57,8 +57,8 @@
 | ADPT-03 | Phase 1 | Complete |
 | SAFE-01 | Phase 1 | Complete |
 | ADPT-01 | Phase 2 | Complete |
-| ADPT-02 | Phase 3 | Pending |
-| CMD-03 | Phase 3 | Pending |
+| ADPT-02 | Phase 3 | Complete |
+| CMD-03 | Phase 3 | Complete |
 | CMD-02 | Phase 4 | Pending |
 | SAFE-03 | Phase 4 | Pending |
 | SAFE-02 | Phase 5 | Pending |
@@ -74,4 +74,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after Phase 2 execution*
+*Last updated: 2026-03-03 after Phase 3 execution*
