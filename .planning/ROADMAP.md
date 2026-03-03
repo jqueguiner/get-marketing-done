@@ -59,7 +59,7 @@ Plans:
   1. Existing Claude command set works via adapter interface without breaking behavior
   2. Campaign progress and verify outputs remain equivalent pre/post refactor
   3. No Claude-specific orchestration assumptions remain in shared core logic
-**Plans:** 0 plans
+**Plans:** 0/2 plans executed
 
 Plans:
 - [ ] 03-01-PLAN.md -- Refactor Claude command wiring to adapter contract
@@ -144,7 +144,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Canonical Contracts | 2/2 | Complete   | 2026-03-03 |
 | 2. Codex Adapter Foundation | 2/2 | Complete    | 2026-03-03 |
-| 3. Claude Adapter Parity Refactor | 0/2 | Not started | — |
+| 3. Claude Adapter Parity Refactor | 0/2 | Planned    |  |
 | 4. Cross-Adapter State Continuity | 0/2 | Not started | — |
 | 5. Verification Gate Consistency | 0/2 | Not started | — |
 | 6. Parity Test Harness | 0/2 | Not started | — |
