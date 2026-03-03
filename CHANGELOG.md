@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.8
+
+- Add missing commands to README: crm-connect, segmentation, update
+- Add release process docs to README
+
+
 ## 1.1.7
 
 - Maintenance release
