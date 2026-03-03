@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Canonical Contracts** - Define canonical workflow actions, adapter interfaces, and provider capability matrix (completed 2026-03-03)
 - [x] **Phase 2: Codex Adapter Foundation** - Implement Codex-oriented adapter wiring for canonical actions (completed 2026-03-03)
 - [x] **Phase 3: Claude Adapter Parity Refactor** - Refactor existing Claude integration onto shared adapter interface without regressions (completed 2026-03-03)
-- [ ] **Phase 4: Cross-Adapter State Continuity** - Ensure pause/resume/progress behavior and persisted state compatibility across adapters
+- [x] **Phase 4: Cross-Adapter State Continuity** - Ensure pause/resume/progress behavior and persisted state compatibility across adapters (completed 2026-03-03)
 - [ ] **Phase 5: Verification Gate Consistency** - Enforce manual verification and safety gates uniformly for every adapter
 - [ ] **Phase 6: Parity Test Harness** - Add compatibility checks for key command/state/output paths
 - [ ] **Phase 7: Additional Adapter Scaffolds** - Add Gemini/OpenCode/Mistral-compatible scaffolds against shared contracts
@@ -73,11 +73,11 @@ Plans:
   1. Pause in one adapter can resume correctly from another adapter
   2. STATE/DB artifacts remain backward compatible
   3. Progress state transitions are consistent across adapters
-**Plans:** 0/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 04-01-PLAN.md -- Normalize adapter metadata and state bridge fields
-- [ ] 04-02-PLAN.md -- Validate cross-adapter resume/progress scenarios
+- [x] 04-01-PLAN.md -- Normalize adapter metadata and state bridge fields
+- [x] 04-02-PLAN.md -- Validate cross-adapter resume/progress scenarios
 
 ### Phase 5: Verification Gate Consistency
 **Goal**: Ensure manual verification and send-safety gates are enforced identically across adapters
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Canonical Contracts | 2/2 | Complete   | 2026-03-03 |
 | 2. Codex Adapter Foundation | 2/2 | Complete    | 2026-03-03 |
 | 3. Claude Adapter Parity Refactor | 2/2 | Complete   | 2026-03-03 |
-| 4. Cross-Adapter State Continuity | 0/2 | Planned    |  |
+| 4. Cross-Adapter State Continuity | 2/2 | Complete   | 2026-03-03 |
 | 5. Verification Gate Consistency | 0/2 | Not started | — |
 | 6. Parity Test Harness | 0/2 | Not started | — |
 | 7. Additional Adapter Scaffolds | 0/2 | Not started | — |

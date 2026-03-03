@@ -14,14 +14,14 @@
 ### Command and Workflow Parity
 
 - [ ] **CMD-01**: Operator can invoke core GTM pipeline steps with consistent state transitions across supported adapters.
-- [ ] **CMD-02**: Operator can resume paused work from persisted state even when switching assistant frontends.
+- [x] **CMD-02**: Operator can resume paused work from persisted state even when switching assistant frontends.
 - [x] **CMD-03**: Operator can run campaign progress/verification commands with equivalent outputs across adapters.
 
 ### Integration and State Safety
 
 - [x] **SAFE-01**: Maintainer can keep provider-specific auth/config isolated from core workflow logic.
 - [ ] **SAFE-02**: Operator can execute manual verification gates before send actions in every supported adapter.
-- [ ] **SAFE-03**: System can preserve existing SQLite/CSV/Markdown schemas during adaptation.
+- [x] **SAFE-03**: System can preserve existing SQLite/CSV/Markdown schemas during adaptation.
 
 ### Quality and Compatibility Validation
 
@@ -59,8 +59,8 @@
 | ADPT-01 | Phase 2 | Complete |
 | ADPT-02 | Phase 3 | Complete |
 | CMD-03 | Phase 3 | Complete |
-| CMD-02 | Phase 4 | Pending |
-| SAFE-03 | Phase 4 | Pending |
+| CMD-02 | Phase 4 | Complete |
+| SAFE-03 | Phase 4 | Complete |
 | SAFE-02 | Phase 5 | Pending |
 | CMD-01 | Phase 6 | Pending |
 | QUAL-01 | Phase 6 | Pending |
@@ -74,4 +74,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after Phase 3 execution*
+*Last updated: 2026-03-03 after Phase 4 execution*
