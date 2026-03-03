@@ -1,0 +1,16 @@
+data/gtm.db
+data/gtm.db-wal
+data/gtm.db-shm
+data/enrichment_progress.json
+data/lists/
+data/enriched/
+data/instantly/
+data/results/
+data/research/
+data/templates/
+data/company_context.md
+config.json
+__pycache__/
+*.pyc
+.claude/
+/tmp/
