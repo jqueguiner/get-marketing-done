@@ -1,51 +1,17 @@
+<div align="center">
+
 # Get Marketing Done
 
-A Claude Code plugin for full-cycle GTM automation. From ICP definition through list building, enrichment, email generation, and campaign execution. Every session compounds on the last.
+**Full-cycle GTM automation for Claude Code.**
+**From ICP definition to closed deals. Every session compounds on the last.**
 
-## The Problem
-
-GTM teams start fresh every campaign, losing context across tools and people. ICP definitions live in one doc, prospect lists in another, email copy in a third, and campaign results in a fourth. Nothing connects.
-
-## The Solution
-
-A single system where context compounds. Past campaigns inform future ones. Win cases shape prospect lists. Reply data refines your ICP. All through Claude Code skills that chain together.
-
-## Skills
-
-| Step | Command | What it does |
-|------|---------|--------------|
-| 0 | `/company-context-builder` | Build company context — ICP, product lingo, win cases. Ingest call transcripts. |
-| 1 | `/list-building` | Lookalike search (from wins) or instant search (new verticals). 200-500 companies. |
-| 2 | `/market-problems-deep-research` | Deep research on industry problems + what leaders say. Education, not prospecting. |
-| 3 | `/data-points-builder` | Define and collect company-level research signals — podcasts, launches, hiring signals. |
-| 4 | `/table-enrichment` | Run enrichment via Extruct. SQLite tracks progress, quality, fill rates. |
-| 5 | Re-run `/list-building refine` | Use enrichment datapoints to narrow the list to companies that actually match. |
-| 6 | Tiering & segmentation | Built into the data layer — segment companies and align with problem hypotheses. |
-| 7 | `/email-generation` | Strict instruction-based email assembly. Define the formula, iterate in chat. |
-| 8 | `/copy-feedback` | Build prospect persona from social profiles, simulate cold read, refine per prospect. |
-| 9 | `/run-instantly` | Prepare CSV, upload to Instantly, verification checklist. Never auto-sends. |
-| 10 | `/company-context-builder` | Results feed back in. Every campaign makes the next one sharper. |
-
-## Setup
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-orange.svg?style=for-the-badge)](https://docs.anthropic.com/en/docs/claude-code)
+[![Playwright](https://img.shields.io/badge/Playwright-MCP-green.svg?style=for-the-badge)](https://github.com/anthropics/claude-code)
 
 ```bash
-# Clone
-git clone git@github.com:jqueguiner/get-marketing-done.git
-
-# Configure API keys
-cp config.example.json config.json
-# Edit config.json with your keys (Extruct, Instantly, Perplexity)
-
-# Initialize the database
-python3 scripts/db_manager.py init
-
-# Load as Claude Code plugin
-claude --plugin-dir /path/to/get-marketing-done
+git clone https://github.com/jqueguiner/get-marketing-done.git
 ```
-
-## How It Works
-
-### The Compound Loop
 
 ```
 Context → Lists → Research → Datapoints → Enrichment → Emails → Feedback → Send → Results
@@ -53,38 +19,491 @@ Context → Lists → Research → Datapoints → Enrichment → Emails → Feed
    └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Every campaign result feeds back into company context. Your ICP sharpens. Your messaging improves. Your lists get more targeted.
+*"GTM teams start fresh every campaign, losing context across tools and people.*
+*This system remembers everything. Every campaign makes the next one sharper."*
+
+---
+
+[Install](#install) · [Commands](#commands) · [How It Works](#how-it-works) · [Configuration](#configuration) · [Playwright MCP](#playwright-mcp) · [Troubleshooting](#troubleshooting)
+
+</div>
+
+---
+
+## Why This Exists
+
+ICP definitions live in one doc. Prospect lists in a spreadsheet. Email copy in another tool. Campaign results in Instantly. Call notes in Notion. Nothing connects.
+
+Every campaign starts from scratch. The SDR who ran the last campaign left. The messaging doc is outdated. The "learnings" from Q3 are in a Slack thread nobody can find.
+
+Get Marketing Done keeps everything in one place — a SQLite database and a living context file that compounds across campaigns. Past wins shape future lists. Reply data refines your ICP. Objections from calls feed into email copy. Context never gets lost.
+
+## Who This Is For
+
+Founders, GTM leads, and operators who run outbound themselves and want a system that gets smarter with every campaign.
+
+---
+
+## Install
+
+### Quick Start (Recommended)
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/jqueguiner/get-marketing-done.git
+cd get-marketing-done
+
+# 2. Initialize the database
+python3 scripts/db_manager.py init
+
+# 3. Configure API keys (optional — the system works without them)
+cp config.example.json config.json
+# Edit config.json with your keys
+
+# 4. Install as a Claude Code plugin
+claude /install-plugin /path/to/get-marketing-done
+```
+
+Then verify it works:
+
+```
+/marketing:company-context-builder init
+```
+
+> [!TIP]
+> You don't need any API keys to start. The core workflow (context building, list building, research, email generation, copy feedback) runs entirely on Claude Code's built-in tools. API keys for Extruct, Instantly, and Perplexity unlock additional capabilities.
+
+### Install Methods
+
+There are three ways to install Get Marketing Done depending on your needs:
+
+#### Option A: Global Install (all projects)
+
+Makes the plugin available in every Claude Code session on your machine.
+
+```bash
+git clone https://github.com/jqueguiner/get-marketing-done.git ~/.claude/plugins/get-marketing-done
+cd ~/.claude/plugins/get-marketing-done
+python3 scripts/db_manager.py init
+```
+
+Then add it to your global Claude Code settings:
+
+```bash
+# Open your global settings
+cat ~/.claude/settings.json
+```
+
+Add the plugin directory to your settings:
+
+```json
+{
+  "plugins": [
+    "~/.claude/plugins/get-marketing-done"
+  ]
+}
+```
+
+#### Option B: Local Install (current project only)
+
+Keeps the plugin scoped to a specific project directory.
+
+```bash
+cd /your/project
+git clone https://github.com/jqueguiner/get-marketing-done.git .claude/plugins/get-marketing-done
+cd .claude/plugins/get-marketing-done
+python3 scripts/db_manager.py init
+```
+
+Add to your project's `.claude/settings.json`:
+
+```json
+{
+  "plugins": [
+    ".claude/plugins/get-marketing-done"
+  ]
+}
+```
+
+#### Option C: Direct Plugin Flag
+
+Load it on-demand without permanent installation:
+
+```bash
+claude --plugin-dir /path/to/get-marketing-done
+```
+
+<details>
+<summary><strong>Development Install</strong></summary>
+
+If you want to modify the plugin or contribute:
+
+```bash
+git clone https://github.com/jqueguiner/get-marketing-done.git
+cd get-marketing-done
+python3 scripts/db_manager.py init
+
+# Run Claude Code with the local plugin
+claude --plugin-dir .
+```
+
+All skills and scripts are plain files (Markdown + Python) — edit them directly, no build step.
+
+</details>
+
+### Verify Installation
+
+After installing, start Claude Code and run:
+
+```
+/marketing:company-context-builder show
+```
+
+You should see a message about no context file existing yet. That means the plugin is loaded and working.
+
+To see all available commands:
+
+```
+/help
+```
+
+Look for commands prefixed with `marketing:` in the list.
+
+> [!IMPORTANT]
+> The plugin requires Python 3.7+ for the data scripts (SQLite, CSV generation, email assembly). No pip dependencies needed — everything uses the Python standard library.
+
+---
+
+## Commands
+
+All commands are prefixed with `marketing:` when used as a plugin. The full workflow runs in order, but you can jump to any step.
+
+### Core Workflow
+
+| Step | Command | What It Does |
+|:----:|---------|--------------|
+| 0 | `/marketing:company-context-builder` | Build company context — ICP, product lingo, win cases, objections. Ingest call transcripts. |
+| 1 | `/marketing:list-building` | Lookalike search (from wins) or instant search (new verticals). 200-500 companies. |
+| 2 | `/marketing:market-problems-deep-research` | Deep research on industry problems + what leaders say. Education, not prospecting. |
+| 3 | `/marketing:data-points-builder` | Define and collect company-level signals — podcasts, launches, hiring, tech stack. |
+| 4 | `/marketing:table-enrichment` | Run enrichment via Extruct, Playwright scraping, or deep research. SQLite tracks progress. |
+| 5 | `/marketing:list-building refine` | Re-run list building with enrichment datapoints as search parameters. |
+| 6 | *Built into data layer* | Tiering and segmentation — group companies by traits, align with problem hypotheses. |
+| 7 | `/marketing:email-generation` | Strict instruction-based email assembly. Define the formula, iterate in chat. |
+| 8 | `/marketing:copy-feedback` | Build prospect persona from social profiles, simulate cold read, refine per prospect. |
+| 9 | `/marketing:run-instantly` | Prepare CSV, upload to Instantly, verification checklist. Never auto-sends. |
+| 10 | `/marketing:company-context-builder` | Results feed back in. The compound loop closes. |
+
+### Command Arguments
+
+| Command | Arguments | Example |
+|---------|-----------|---------|
+| `company-context-builder` | `init`, `update-from-call <path>`, `update-from-results <campaign>`, `show` | `/marketing:company-context-builder update-from-call ./calls/acme-demo.txt` |
+| `list-building` | `lookalike <company>`, `search <criteria>`, `refine` | `/marketing:list-building lookalike Stripe` |
+| `market-problems-deep-research` | `<industry or problem>` | `/marketing:market-problems-deep-research "data pipeline reliability"` |
+| `data-points-builder` | `define`, `research <company>`, `bulk-research`, `show` | `/marketing:data-points-builder research "Acme Corp"` |
+| `table-enrichment` | `run <campaign>`, `status`, `validate`, `export` | `/marketing:table-enrichment status` |
+| `email-generation` | `create-template`, `generate <company>`, `bulk-generate <segment>`, `preview`, `iterate` | `/marketing:email-generation generate "Acme Corp"` |
+| `copy-feedback` | `<company>` or `<person at company>` | `/marketing:copy-feedback "Jane Smith at Acme Corp"` |
+| `run-instantly` | `prepare <campaign>`, `upload <campaign>`, `verify <campaign>`, `results <campaign>` | `/marketing:run-instantly prepare q1-fintech` |
+
+---
+
+## How It Works
+
+### The Compound Loop
+
+This is the core idea. Every step feeds into the next, and results feed back to the beginning:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│   ┌─────────┐   ┌───────┐   ┌──────────┐   ┌────────────┐   ┌──────────┐  │
+│   │ Context │──▶│ Lists │──▶│ Research │──▶│ Datapoints │──▶│ Enrich   │  │
+│   └─────────┘   └───────┘   └──────────┘   └────────────┘   └──────────┘  │
+│        ▲                                                          │        │
+│        │                                                          ▼        │
+│   ┌─────────┐   ┌────────┐   ┌──────────┐   ┌────────────┐  ┌──────────┐  │
+│   │ Results │◀──│  Send  │◀──│ Feedback │◀──│   Emails   │◀─│ Segment  │  │
+│   └─────────┘   └────────┘   └──────────┘   └────────────┘  └──────────┘  │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ### Data Layer
 
-- **SQLite** (`data/gtm.db`) — single source of truth for companies, contacts, datapoints, emails, campaigns, results
-- **Markdown** (`data/company_context.md`) — living document that evolves with every interaction
-- **JSON templates** (`data/templates/`) — strict email assembly formulas
-- **Research files** (`data/research/`) — market problem deep dives
+Everything lives in two places:
+
+```
+data/
+├── gtm.db                    ← SQLite: companies, contacts, datapoints, emails, campaigns, results
+├── company_context.md        ← Living document: ICP, glossary, win cases, learnings log
+├── datapoint_schema.json     ← What signals to collect per company
+├── research/                 ← Market problem deep dives (per industry)
+├── templates/                ← Email assembly formulas (strict, no freestyling)
+├── lists/                    ← Generated prospect lists (CSV)
+├── enriched/                 ← Enriched data exports
+├── instantly/                ← Instantly-ready upload CSVs
+└── results/                  ← Campaign result imports
+```
+
+> [!NOTE]
+> All runtime data (`data/`, `config.json`) is gitignored. Only the skills, scripts, and configuration templates are versioned. Your prospect data stays local.
 
 ### Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `scripts/db_manager.py` | 20 CLI commands for all data operations |
-| `scripts/email_assembler.py` | Template-based email generation with forbidden word checking |
-| `scripts/enrichment_runner.py` | Extruct / deep research orchestration with progress tracking |
-| `scripts/instantly_uploader.py` | CSV preparation, upload, and results fetching |
+Four Python scripts power the data layer. No pip dependencies — standard library only.
 
-## API Integrations
+| Script | Commands | Purpose |
+|--------|----------|---------|
+| `db_manager.py` | 20 CLI commands | All SQLite operations — companies, datapoints, emails, campaigns, segments |
+| `email_assembler.py` | `generate`, `bulk-generate`, `list-templates` | Template-based email assembly with forbidden word checking |
+| `enrichment_runner.py` | `run`, `status` | Enrichment orchestration with progress tracking |
+| `instantly_uploader.py` | `prepare`, `upload`, `results` | CSV generation, Instantly API upload, results fetching |
 
-| Service | Used For | Required? |
-|---------|----------|-----------|
-| Extruct | Data enrichment | Optional (can use deep research instead) |
-| Instantly | Email sequencing | For sending campaigns |
-| Perplexity | Deep research | Optional (falls back to web search) |
+---
 
-Set keys in `config.json` or as environment variables.
+## Configuration
+
+### API Keys
+
+Copy the example config and add your keys:
+
+```bash
+cp config.example.json config.json
+```
+
+```json
+{
+  "extruct_api_key": "your-key-here",
+  "instantly_api_key": "your-key-here",
+  "perplexity_api_key": "your-key-here"
+}
+```
+
+Or set as environment variables:
+
+```bash
+export EXTRUCT_API_KEY="your-key-here"
+export INSTANTLY_API_KEY="your-key-here"
+export PERPLEXITY_API_KEY="your-key-here"
+```
+
+| Service | Used For | Required? | Without It |
+|---------|----------|:---------:|------------|
+| Extruct | Structured data enrichment | No | Use Playwright scraping or deep research instead |
+| Instantly | Email sequencing and sending | No | Generates CSVs for manual import into any email tool |
+| Perplexity | Deep market research | No | Falls back to Claude's built-in WebSearch |
+
+> [!TIP]
+> You can run the entire workflow with zero API keys. The system uses Claude Code's built-in WebSearch, WebFetch, and Playwright MCP for research, and generates CSVs you can import into any email tool.
+
+### Permissions
+
+The plugin ships with a `settings.json` that pre-approves common tool patterns:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 scripts/*)",
+      "Bash(sqlite3 data/gtm.db *)",
+      "Read", "Write", "Edit",
+      "Glob", "Grep",
+      "WebSearch", "WebFetch"
+    ]
+  }
+}
+```
+
+You'll still be prompted for Playwright browser actions and any commands outside this list.
+
+---
+
+## Playwright MCP
+
+Every skill is enhanced with Playwright MCP browser automation when available. This is optional but significantly upgrades the system's ability to gather real data.
+
+### What Playwright Unlocks
+
+| Skill | Without Playwright | With Playwright |
+|-------|--------------------|-----------------|
+| **List Building** | WebSearch snippets only | Navigate Crunchbase/G2/directories, paginate results, apply on-site filters |
+| **Deep Research** | WebFetch for static HTML | Read full articles on JS-heavy sites, expand collapsed sections |
+| **Data Points** | Search snippets + WebFetch | Visit careers pages, detect tech stack from loaded JS, scrape blogs |
+| **Copy Feedback** | Search-based persona building | Navigate LinkedIn/Twitter profiles, read actual posts and career history |
+| **Run Instantly** | CSV export + manual upload | Upload CSV via browser, walk through dashboard verification, scrape analytics |
+| **Enrichment** | Extruct API or search-based | Direct website scraping — careers, about pages, blogs — with high confidence |
+| **Context Builder** | Manual result entry | Scrape Instantly dashboard for campaign results when API key is unavailable |
+
+### Setting Up Playwright MCP
+
+If you already have the Playwright MCP server configured in Claude Code, the skills will detect and use it automatically. No additional setup needed.
+
+If you don't have it yet:
+
+```bash
+# Install the Playwright MCP server
+npm install -g @anthropic/mcp-playwright
+
+# Add to your Claude Code MCP config (~/.claude/mcp.json)
+```
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@anthropic/mcp-playwright"]
+    }
+  }
+}
+```
+
+> [!NOTE]
+> All skills gracefully fall back to WebSearch and WebFetch when Playwright is not available. The browser tools are additive — nothing breaks without them.
+
+---
+
+## Typical Session
+
+Here's what a real session looks like, start to finish:
+
+```
+# 1. Start with context (first time only — after this it compounds)
+/marketing:company-context-builder init
+
+# 2. Build a prospect list based on a successful customer
+/marketing:list-building lookalike "Acme Corp"
+
+# 3. Research the problems this vertical faces
+/marketing:market-problems-deep-research "data pipeline reliability in fintech"
+
+# 4. Define what signals to collect per company
+/marketing:data-points-builder define
+
+# 5. Enrich the list
+/marketing:table-enrichment run q1-fintech
+
+# 6. Optional: refine the list based on what enrichment revealed
+/marketing:list-building refine
+
+# 7. Create an email template and generate
+/marketing:email-generation create-template
+/marketing:email-generation bulk-generate fintech-segment
+
+# 8. Simulate how prospects will react (per prospect)
+/marketing:copy-feedback "Jane Smith at FinCo"
+
+# 9. Upload to Instantly and verify
+/marketing:run-instantly prepare q1-fintech
+/marketing:run-instantly verify q1-fintech
+
+# 10. After the campaign runs, feed results back
+/marketing:company-context-builder update-from-results q1-fintech
+```
+
+---
+
+## Project Structure
+
+```
+get-marketing-done/
+├── .claude-plugin/
+│   └── plugin.json              ← Plugin manifest
+├── skills/
+│   ├── company-context-builder/
+│   │   └── SKILL.md             ← Step 0 + 10: context compound loop
+│   ├── list-building/
+│   │   └── SKILL.md             ← Step 1 + 5: lookalike / instant / refine
+│   ├── market-problems-deep-research/
+│   │   └── SKILL.md             ← Step 2: industry problem education
+│   ├── data-points-builder/
+│   │   └── SKILL.md             ← Step 3: company research signals
+│   ├── table-enrichment/
+│   │   └── SKILL.md             ← Step 4: enrichment orchestration
+│   ├── email-generation/
+│   │   └── SKILL.md             ← Step 7: strict formula email assembly
+│   ├── copy-feedback/
+│   │   └── SKILL.md             ← Step 8: prospect persona simulation
+│   └── run-instantly/
+│       └── SKILL.md             ← Step 9: Instantly upload + verification
+├── scripts/
+│   ├── db_manager.py            ← SQLite data layer (20 commands)
+│   ├── email_assembler.py       ← Template-based email generation
+│   ├── enrichment_runner.py     ← Enrichment orchestration
+│   └── instantly_uploader.py    ← Instantly CSV + API integration
+├── data/                        ← Runtime data (gitignored)
+├── config.example.json          ← API key template
+├── config.json                  ← Your API keys (gitignored)
+├── settings.json                ← Permission pre-approvals
+└── .gitignore
+```
+
+---
+
+## Troubleshooting
+
+**Skills don't show up after install**
+
+Make sure the plugin directory path is correct. Run `ls /path/to/get-marketing-done/.claude-plugin/plugin.json` to verify the manifest exists. Restart Claude Code after adding the plugin.
+
+**"Database not found" errors**
+
+Run `python3 scripts/db_manager.py init` from the plugin directory. This creates `data/gtm.db`.
+
+**Playwright tools not available**
+
+The Playwright MCP server needs to be configured separately in your Claude Code MCP settings. See [Playwright MCP](#playwright-mcp) section. Skills work without it — they fall back to WebSearch/WebFetch.
+
+**"Company not found" when running commands**
+
+Company names are matched with `LIKE %name%`. Use the exact name stored in the database. Run `python3 scripts/db_manager.py list-companies` to see what's there.
+
+**Enrichment is slow**
+
+Bulk research spawns parallel agents but is still bounded by API rate limits. Use smaller batch sizes (10-20) and monitor with `/marketing:table-enrichment status`.
+
+**Emails contain {placeholder} text**
+
+The company is missing required datapoints. Run `/marketing:table-enrichment validate` to see what's missing, then enrich before regenerating emails.
+
+<details>
+<summary><strong>Reset everything and start fresh</strong></summary>
+
+```bash
+# Remove the database and all runtime data
+rm -f data/gtm.db
+rm -rf data/lists data/enriched data/instantly data/results data/research data/templates
+rm -f data/company_context.md data/datapoint_schema.json data/enrichment_progress.json
+
+# Reinitialize
+python3 scripts/db_manager.py init
+```
+
+This preserves your skills and scripts but clears all prospect data, campaigns, and context.
+
+</details>
+
+---
 
 ## Philosophy
 
-- **Context compounds** — nothing gets thrown away between campaigns
-- **Strict email assembly** — no AI freestyling, you define the exact formula
-- **Manual verification** — never auto-sends, always requires human sign-off
-- **Per-prospect refinement** — copy feedback runs one prospect at a time
-- **Hypothesis-driven** — every list starts with a hypothesis, results validate or invalidate it
+- **Context compounds** — nothing gets thrown away between campaigns. The system remembers.
+- **Strict email assembly** — no AI freestyling. You define the exact formula, the script assembles it.
+- **Manual verification** — never auto-sends. Always requires human sign-off before emails go out.
+- **Per-prospect refinement** — copy feedback runs one prospect at a time. Quality over speed.
+- **Hypothesis-driven** — every list starts with a hypothesis. Results validate or invalidate it.
+- **Zero lock-in** — SQLite + CSV + Markdown. Your data is yours. Export and leave anytime.
+
+---
+
+## License
+
+MIT
+
+<div align="center">
+
+*Stop starting from scratch. Start compounding.*
+
+</div>
