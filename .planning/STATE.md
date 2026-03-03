@@ -25,7 +25,7 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 Phase: 2 of 8 (Codex Adapter Foundation)
 Plan: 0 of 2 in current phase
 Status: Phase 1 executed and verified -- ready for Phase 2 planning
-Last activity: 2026-03-03 -- Phase 1 complete (2/2 plans, verification passed)
+Last activity: 2026-03-03 -- Phase 2 context gathered (strict Codex command + full wiring decisions captured)
 
 Progress: [█░░░░░░░░░] 12%
 
@@ -65,6 +65,7 @@ Recent decisions affecting current work:
 - [Execute P1]: Canonical payload normalization strips secret-like metadata keys (`token`, `api_key`, `access_token`, `secret`)
 - [Execute P1]: Capability matrix policy standardized as `native_wins_alias_warns`
 - [Execute P1]: Ingress routing now attempts native/canonical translation before unknown-command hard fail
+- [Discuss P2]: Codex native surface locked to `$gmd-*` only, unmapped commands hard-fail, full wiring required, full command sweep required
 
 ### Roadmap Evolution
 
@@ -82,6 +83,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 1 complete and verified
-Resume file: .planning/phases/01-canonical-contracts/01-VERIFICATION.md
-Next: $gsd-discuss-phase 2
+Stopped at: Phase 2 context gathered
+Resume file: .planning/phases/02-codex-adapter-foundation/02-CONTEXT.md
+Next: $gsd-plan-phase 2
