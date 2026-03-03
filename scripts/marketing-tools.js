@@ -121,6 +121,7 @@ function initCampaign(campaignName) {
       has_extruct_key: !!(config.extruct_api_key || process.env.EXTRUCT_API_KEY),
       has_instantly_key: !!(config.instantly_api_key || process.env.INSTANTLY_API_KEY),
       has_perplexity_key: !!(config.perplexity_api_key || process.env.PERPLEXITY_API_KEY),
+      has_hubspot_token: !!(config.hubspot_access_token || process.env.HUBSPOT_ACCESS_TOKEN),
       workflow: config.workflow || {},
       model_profile: config.model_profile || 'balanced',
     },
@@ -501,6 +502,29 @@ function configEnsure() {
   return config;
 }
 
+// ─── DB Pass-through ───
+
+var DB_COMMANDS = [
+  'add-companies', 'add-contacts', 'add-datapoints', 'assign-segment',
+  'campaign-results', 'create-segment', 'define-datapoints', 'enrichment-status',
+  'export', 'get-company', 'get-email', 'get-emails', 'list-companies',
+  'mark-uploaded', 'save-emails', 'save-results', 'show-datapoints',
+  'update-email', 'validate-enrichment'
+];
+
+function dbPassthrough(cmd, args) {
+  var dbScript = path.join(__dirname, 'db_manager.py');
+  try {
+    var out = execFileSync('python3', [dbScript, cmd].concat(args), {
+      encoding: 'utf8', timeout: 30000
+    });
+    try { return JSON.parse(out); }
+    catch { return { output: out.trim() }; }
+  } catch (e) {
+    return { error: 'db_manager ' + cmd + ' failed', detail: (e.stderr || e.message || '').trim() };
+  }
+}
+
 // ─── Dispatcher ───
 
 var COMMANDS = {
@@ -522,6 +546,11 @@ var COMMANDS = {
   'config-set':        function(args) { return configSet(args[0], args.slice(1).join(' ')); },
   'config-ensure':     function()     { return configEnsure(); },
 };
+
+// Register db commands as pass-throughs
+DB_COMMANDS.forEach(function(cmd) {
+  COMMANDS[cmd] = function(args) { return dbPassthrough(cmd, args); };
+});
 
 function main() {
   var args = process.argv.slice(2);

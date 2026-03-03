@@ -1,0 +1,122 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump type
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get current version
+        id: current
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Bump version
+        id: bump
+        env:
+          BUMP_TYPE: ${{ inputs.bump }}
+        run: |
+          npm version "$BUMP_TYPE" --no-git-tag-version
+          echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog entry
+        id: changelog
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -n "$PREV_TAG" ]; then
+            LOG=$(git log "${PREV_TAG}..HEAD" --pretty=format:"- %s" --no-merges)
+          else
+            LOG=$(git log --pretty=format:"- %s" --no-merges)
+          fi
+
+          if [ -z "$LOG" ]; then
+            LOG="- Maintenance release"
+          fi
+
+          ENTRY="## ${NEW_VERSION}
+
+          ${LOG}"
+
+          # Write entry to file for later steps
+          echo "$ENTRY" > /tmp/changelog-entry.md
+
+          # Write to GITHUB_OUTPUT using delimiter
+          {
+            echo "entry<<CHANGELOG_EOF"
+            echo "$ENTRY"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update CHANGELOG.md
+        run: |
+          if [ -f CHANGELOG.md ]; then
+            # Insert new entry after the "# Changelog" heading
+            head -1 CHANGELOG.md > /tmp/changelog-new.md
+            echo "" >> /tmp/changelog-new.md
+            cat /tmp/changelog-entry.md >> /tmp/changelog-new.md
+            echo "" >> /tmp/changelog-new.md
+            tail -n +2 CHANGELOG.md >> /tmp/changelog-new.md
+            mv /tmp/changelog-new.md CHANGELOG.md
+          else
+            {
+              echo "# Changelog"
+              echo ""
+              cat /tmp/changelog-entry.md
+            } > CHANGELOG.md
+          fi
+
+      - name: Commit and tag
+        env:
+          NEW_VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          git add package.json CHANGELOG.md
+          git commit -m "Release v${NEW_VERSION}"
+          git tag "v${NEW_VERSION}"
+
+      - name: Push
+        run: |
+          git push origin main
+          git push origin --tags
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_VERSION: ${{ steps.bump.outputs.version }}
+        run: |
+          gh release create "v${NEW_VERSION}" \
+            --title "v${NEW_VERSION}" \
+            --notes-file /tmp/changelog-entry.md
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish

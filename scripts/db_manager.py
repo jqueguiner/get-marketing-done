@@ -673,21 +673,30 @@ def add_contacts(file_path):
         contacts = json.load(f)
 
     added = 0
+    skipped = 0
     for c in contacts:
         company_row = conn.execute("SELECT id FROM companies WHERE name LIKE ? OR domain = ?",
                                    (f"%{c.get('company', '')}%", c.get("domain", ""))).fetchone()
         company_id = company_row["id"] if company_row else None
 
+        # Skip duplicate contacts by email
+        email = c.get("email", "")
+        if email:
+            existing = conn.execute("SELECT id FROM contacts WHERE email = ?", (email,)).fetchone()
+            if existing:
+                skipped += 1
+                continue
+
         conn.execute("""
             INSERT INTO contacts (company_id, name, first_name, last_name, title, email, linkedin_url, source)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (company_id, c.get("name"), c.get("first_name"), c.get("last_name"),
-              c.get("title"), c.get("email"), c.get("linkedin_url"), c.get("source")))
+              c.get("title"), email, c.get("linkedin_url"), c.get("source")))
         added += 1
 
     conn.commit()
     conn.close()
-    print(json.dumps({"contacts_added": added}))
+    print(json.dumps({"contacts_added": added, "skipped_duplicates": skipped}))
 
 
 def create_segment(name, criteria, hypothesis, problem_file=None):
@@ -719,6 +728,97 @@ def assign_segment(company_name, segment_name, tier):
     conn.commit()
     conn.close()
     print(json.dumps({"assigned": True, "company": company_name, "segment": segment_name, "tier": tier}))
+
+
+def list_segments():
+    """List all segments with company counts per tier."""
+    conn = get_db()
+    segments = conn.execute("SELECT * FROM segments ORDER BY name").fetchall()
+
+    results = []
+    for s in segments:
+        tier_counts = conn.execute("""
+            SELECT tier, COUNT(*) as cnt FROM company_segments
+            WHERE segment_id = ? GROUP BY tier
+        """, (s["id"],)).fetchall()
+        tiers = {row["tier"]: row["cnt"] for row in tier_counts}
+        total = sum(tiers.values())
+        results.append({
+            "id": s["id"],
+            "name": s["name"],
+            "criteria": s["criteria"],
+            "hypothesis": s["hypothesis"],
+            "problem_research_file": s["problem_research_file"],
+            "companies": {
+                "total": total,
+                "tier_1": tiers.get("1", 0),
+                "tier_2": tiers.get("2", 0),
+                "tier_3": tiers.get("3", 0),
+            }
+        })
+
+    conn.close()
+    print(json.dumps(results, indent=2, default=str))
+
+
+def segment_companies(segment_name, tier=None):
+    """List companies in a segment, optionally filtered by tier."""
+    conn = get_db()
+    segment = conn.execute("SELECT id FROM segments WHERE name = ?", (segment_name,)).fetchone()
+    if not segment:
+        print(json.dumps({"error": f"Segment '{segment_name}' not found"}))
+        conn.close()
+        return
+
+    query = """
+        SELECT c.*, cs.tier FROM companies c
+        JOIN company_segments cs ON c.id = cs.company_id
+        WHERE cs.segment_id = ?
+    """
+    params = [segment["id"]]
+    if tier:
+        query += " AND cs.tier = ?"
+        params.append(tier)
+    query += " ORDER BY cs.tier, c.name"
+
+    rows = conn.execute(query, params).fetchall()
+    conn.close()
+    print(json.dumps([dict(r) for r in rows], indent=2, default=str))
+
+
+def bulk_assign_segments(file_path):
+    """Assign companies to segments in bulk from a JSON file."""
+    conn = get_db()
+    init_db()
+
+    with open(file_path) as f:
+        assignments = json.load(f)
+
+    assigned = 0
+    errors = 0
+    for a in assignments:
+        company_row = conn.execute(
+            "SELECT id FROM companies WHERE name LIKE ? OR domain = ?",
+            (f"%{a.get('company', '')}%", a.get("domain", ""))
+        ).fetchone()
+        segment_row = conn.execute(
+            "SELECT id FROM segments WHERE name = ?",
+            (a.get("segment", ""),)
+        ).fetchone()
+
+        if not company_row or not segment_row:
+            errors += 1
+            continue
+
+        conn.execute("""
+            INSERT OR REPLACE INTO company_segments (company_id, segment_id, tier)
+            VALUES (?, ?, ?)
+        """, (company_row["id"], segment_row["id"], a.get("tier", "2")))
+        assigned += 1
+
+    conn.commit()
+    conn.close()
+    print(json.dumps({"assigned": assigned, "errors": errors}))
 
 
 COMMANDS = {
@@ -773,6 +873,12 @@ COMMANDS = {
         segment_name=args.get("--segment", ""),
         tier=args.get("--tier", "2")
     ),
+    "list-segments": lambda args: list_segments(),
+    "segment-companies": lambda args: segment_companies(
+        segment_name=args.get("--segment", args.get("_positional", "")),
+        tier=args.get("--tier")
+    ),
+    "bulk-assign-segments": lambda args: bulk_assign_segments(file_path=args.get("--file")),
 }
 
 

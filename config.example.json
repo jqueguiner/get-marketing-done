@@ -2,6 +2,7 @@
   "extruct_api_key": "",
   "instantly_api_key": "",
   "perplexity_api_key": "",
+  "hubspot_access_token": "",
   "model_profile": "balanced",
   "workflow": {
     "research": true,
