@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-03T22:46:29Z"
+last_updated: "2026-03-03T22:56:57Z"
 progress:
   total_phases: 8
   completed_phases: 5
@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 ## Current Position
 
 Phase: 6 of 8 (Parity Test Harness)
-Plan: 0 of 2 in current phase
-Status: Phase 5 executed and verified -- ready for Phase 6 discussion/planning
-Last activity: 2026-03-03 -- Phase 5 complete (2/2 plans, verification passed)
+Plan: 2 planned (0 executed) in current phase
+Status: Phase 6 planned -- ready for Phase 6 execution
+Last activity: 2026-03-03 -- Phase 6 planning complete (2 plans validated)
 
 Progress: [██████░░░░] 63%
 
@@ -45,7 +45,7 @@ Progress: [██████░░░░] 63%
 | 03-claude-adapter-parity-refactor | 2/2 | ~19min | ~10min |
 | 04-cross-adapter-state-continuity | 2/2 | ~25min | ~12min |
 | 05-verification-gate-consistency | 2/2 | ~22min | ~11min |
-| 06-parity-test-harness | 0/2 | — | — |
+| 06-parity-test-harness | 0/2 | — | — (planned) |
 | 07-additional-adapter-scaffolds | 0/2 | — | — |
 | 08-docs-and-migration-guide | 0/2 | — | — |
 
@@ -77,6 +77,7 @@ Recent decisions affecting current work:
 - [Discuss P5]: Gate authority locked to shared runtime policy with config-backed quality gates and identical Claude/Codex enforcement behavior
 - [Execute P5]: Runtime quality gates centralized with adapter-uniform block contract; validator (`verify_quality_gate_consistency.js`) passing and SAFE-02 closed
 - [Discuss P6]: Parity harness scope locked to critical flows (init/progress/pause-resume/send-prepare) with hybrid strict/semantic checks and requirement-tagged JSON diagnostics
+- [Plan P6]: Execution split into parity orchestrator foundation (wave 1) then critical flow smoke + requirement closure artifacts (wave 2)
 
 ### Roadmap Evolution
 
@@ -98,6 +99,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 6 discussion complete
-Resume file: .planning/phases/06-parity-test-harness/06-CONTEXT.md
-Next: $gsd-plan-phase 6
+Stopped at: Phase 6 planning complete
+Resume file: .planning/phases/06-parity-test-harness/06-02-PLAN.md
+Next: $gsd-execute-phase 6
