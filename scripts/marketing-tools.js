@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
+const { routeCommand, listSupportedCommands } = require('./adapters/command-router');
 
 const ROOT = path.resolve(__dirname, '..');
 const DATA = path.join(ROOT, 'data');
@@ -547,6 +548,44 @@ var COMMANDS = {
   'config-ensure':     function()     { return configEnsure(); },
 };
 
+var ACTION_TO_COMMAND = {
+  'campaign.progress': 'progress',
+  'campaign.verify': 'verify',
+  'report-server.start': 'progress',
+  'work.pause': 'pause',
+  'work.resume': 'init-resume',
+  'context.init': 'init-campaign',
+  'context.show': 'init-campaign',
+  'context.update-results': 'state-advance',
+  'list.search': 'add-companies',
+  'list.lookalike': 'add-companies',
+  'list.refine': 'list-companies',
+  'research.market': 'init-research',
+  'datapoints.define': 'define-datapoints',
+  'datapoints.research': 'get-company',
+  'datapoints.bulk': 'enrichment-status',
+  'enrichment.run': 'init-enrichment',
+  'enrichment.status': 'enrichment-status',
+  'enrichment.validate': 'validate-enrichment',
+  'crm.preview': 'list-companies',
+  'crm.import': 'add-companies',
+  'crm.status': 'list-companies',
+  'segment.create': 'create-segment',
+  'segment.assign': 'assign-segment',
+  'segment.review': 'list-companies',
+  'segment.auto': 'create-segment',
+  'email.template.create': 'save-emails',
+  'email.generate': 'save-emails',
+  'email.bulk': 'save-emails',
+  'email.iterate': 'update-email',
+  'copy.feedback': 'get-email',
+  'outreach.prepare': 'init-outreach',
+  'outreach.upload': 'mark-uploaded',
+  'outreach.verify': 'verify',
+  'outreach.results': 'campaign-results',
+  'tool.update': 'config-ensure'
+};
+
 // Register db commands as pass-throughs
 DB_COMMANDS.forEach(function(cmd) {
   COMMANDS[cmd] = function(args) { return dbPassthrough(cmd, args); };
@@ -556,6 +595,7 @@ function main() {
   var args = process.argv.slice(2);
   var cmd = args[0];
   var cmdArgs = args.slice(1);
+  var provider = process.env.GMD_PROVIDER || 'claude';
 
   if (!cmd || cmd === 'help') {
     console.log(JSON.stringify({
@@ -566,8 +606,24 @@ function main() {
   }
 
   if (!(cmd in COMMANDS)) {
-    console.error(JSON.stringify({ error: 'Unknown command: ' + cmd, available: Object.keys(COMMANDS) }));
-    process.exit(1);
+    var routed = routeCommand({
+      provider: provider,
+      command: cmd,
+      params: {},
+      config: { aliases: process.env.GMD_ALIASES === '1' || process.env.GMD_ALIASES === 'true' }
+    });
+    if (routed && ACTION_TO_COMMAND[routed.action] && (ACTION_TO_COMMAND[routed.action] in COMMANDS)) {
+      cmd = ACTION_TO_COMMAND[routed.action];
+    } else {
+      console.error(JSON.stringify({
+        error: 'Unknown command: ' + cmd,
+        provider: provider,
+        available: Object.keys(COMMANDS),
+        provider_native: listSupportedCommands(provider),
+        canonical_alias: 'gmd:<action> (opt-in, set GMD_ALIASES=true)',
+      }));
+      process.exit(1);
+    }
   }
 
   var result = COMMANDS[cmd](cmdArgs);
