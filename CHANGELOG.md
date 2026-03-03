@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2
+
+- Maintenance release
+
+
 ## 1.1.0
 
 - Add automated release pipeline (GitHub Actions workflow_dispatch)
