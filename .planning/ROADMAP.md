@@ -101,7 +101,7 @@ Plans:
   1. Parity checks compare command outcomes and state transitions between adapters
   2. Key flows (init, progress, pause/resume, send-prepare) are covered
   3. Mismatches fail checks with precise diagnostics
-**Plans:** 0/2 plans executed
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 06-01-PLAN.md -- Build adapter parity test runner and fixtures
@@ -147,6 +147,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Claude Adapter Parity Refactor | 2/2 | Complete   | 2026-03-03 |
 | 4. Cross-Adapter State Continuity | 2/2 | Complete   | 2026-03-03 |
 | 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
-| 6. Parity Test Harness | 0/2 | Planned    |  |
+| 6. Parity Test Harness | 1/2 | In Progress|  |
 | 7. Additional Adapter Scaffolds | 0/2 | Not started | — |
 | 8. Docs and Migration Guide | 0/2 | Not started | — |
