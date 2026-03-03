@@ -6,7 +6,7 @@ data/
 pipeline_export.csv
 
 # Local config
-config.json
+/config.json
 
 # Tool artifacts
 .playwright-mcp/
