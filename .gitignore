@@ -1,18 +1,20 @@
-data/gtm.db
-data/gtm.db-wal
-data/gtm.db-shm
-data/enrichment_progress.json
-data/lists/
-data/enriched/
-data/instantly/
-data/results/
-data/research/
-data/templates/
-data/company_context.md
+# Secrets
+.env
+
+# Local data
+data/
+pipeline_export.csv
+
+# Local config
 config.json
+
+# Tool artifacts
+.playwright-mcp/
+.claude/
 __pycache__/
 *.pyc
-.claude/
-/tmp/
+
+# Build / deps
 node_modules/
 package-lock.json
+/tmp/
