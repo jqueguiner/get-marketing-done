@@ -24,6 +24,16 @@ function listSupportedCommands(provider) {
   return Object.keys(map).sort();
 }
 
+function getProviderDiagnostics(provider) {
+  const commands = listSupportedCommands(provider);
+  return {
+    provider: provider,
+    command_count: commands.length,
+    strict_native: provider === 'codex' ? commands.every(isCodexNativeCommand) : false,
+    native_commands: commands
+  };
+}
+
 function routeCommand(input) {
   const source = input && typeof input === 'object' ? input : {};
   const provider = source.provider || 'claude';
@@ -88,6 +98,7 @@ function routeCommand(input) {
 
 module.exports = {
   isCodexNativeCommand,
+  getProviderDiagnostics,
   routeCommand,
   listSupportedCommands
 };
