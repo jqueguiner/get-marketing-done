@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 Phase: 1 of 8 (Canonical Contracts)
 Plan: 0 of 2 in current phase
 Status: Roadmap created -- ready for phase planning
-Last activity: 2026-03-03 -- Project initialized, requirements and roadmap defined
+Last activity: 2026-03-03 -- Phase 1 context gathered (command naming decisions captured)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -48,6 +48,7 @@ Recent decisions affecting current work:
 - [Init]: Treat project as brownfield adaptation with existing GTM capabilities preserved
 - [Init]: Include cross-assistant support in active scope (Codex first, additional adapters incremental)
 - [Roadmap]: Sequence contract-first then Codex implementation before parity/test hardening
+- [Discuss P1]: Keep provider-native commands plus opt-in canonical aliases (`gmd:<action>`), with native precedence on conflicts
 
 ### Roadmap Evolution
 
@@ -64,6 +65,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Initialization complete; ready to discuss/plan Phase 1
-Resume file: None
-Next: $gsd-discuss-phase 1
+Stopped at: Phase 1 context gathered
+Resume file: .planning/phases/01-canonical-contracts/01-CONTEXT.md
+Next: $gsd-plan-phase 1
