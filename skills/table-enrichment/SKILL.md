@@ -2,13 +2,37 @@
 name: table-enrichment
 description: Run enrichment through Extruct or deep research providers. SQLite tracks progress and quality. Monitor enrichment status and validate data quality.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_run_code
 argument-hint: "[run <campaign> | status | validate | export]"
 ---
 
 # Table Enrichment
 
 You orchestrate data enrichment — filling in missing datapoints using Extruct or deep research. SQLite is the backbone for tracking progress and quality.
+
+## Playwright MCP — browser-based enrichment
+
+If the Playwright MCP is available, you have a third enrichment option beyond Extruct and agent-based research: **direct website scraping**.
+
+### Option D: Playwright scraping enrichment
+
+For datapoints that live on company websites (careers, about pages, blog, tech stack), Playwright is faster and more reliable than WebSearch + WebFetch:
+
+1. Load the list of companies needing enrichment
+2. For each company domain, run a Playwright scraping sequence:
+   - `browser_navigate` to `https://{domain}/careers` → extract hiring signals
+   - `browser_navigate` to `https://{domain}/about` → extract company size, leadership, locations
+   - `browser_navigate` to `https://{domain}/blog` → extract recent posts, topics
+   - `browser_navigate` to `https://{domain}` → `browser_evaluate` to detect tech stack from loaded scripts
+3. Save each scraped datapoint with `enrichment_source = "playwright"` and `confidence = "high"` (direct from source)
+
+### When to combine approaches
+
+- **Extruct** for structured business data (firmographics, contact info, social profiles)
+- **Playwright** for website-sourced data (careers, blog, tech stack, about page)
+- **Agent deep research** for external data (podcasts, press coverage, Glassdoor)
+
+The best enrichment runs use all three in a single pass.
 
 ## Read context first
 
@@ -44,6 +68,9 @@ For datapoints that need web research:
 
 ### Option C: Hybrid
 Run Extruct for structured data (company size, industry, tech stack) and deep research for unstructured data (podcasts, news, hiring).
+
+### Option D: Playwright scraping (if available)
+For datapoints sourced from company websites — see Playwright MCP section above. Best for: careers/hiring, blog/changelog, about page, tech stack detection. Produces high-confidence data because it's scraped directly from the source.
 
 4. After enrichment, run validation: `python3 scripts/db_manager.py validate-enrichment --campaign {campaign}`
 5. Show results: what was found, what's still missing, quality flags

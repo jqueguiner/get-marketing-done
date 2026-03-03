@@ -2,7 +2,7 @@
 name: email-generation
 description: Generate personalized outbound emails. Strict instruction-based assembly — you specify the exact formula, a Python script assembles the final email. Iterate right in the chat until it's perfect.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_run_code
 argument-hint: "[create-template | generate <company> | bulk-generate <segment> | preview | iterate]"
 ---
 

@@ -2,13 +2,57 @@
 name: data-points-builder
 description: Define company-level research datapoints for segmentation or personalization — CEO podcast appearances, recent product launches, hiring signals, tech stack, etc.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_type, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_tabs, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_run_code
 argument-hint: "[define | research <company> | bulk-research | show]"
 ---
 
 # Data Points Builder
 
 You create and populate company-specific research datapoints. These power both segmentation (grouping companies by shared traits) and personalization (tailoring emails per prospect).
+
+## Playwright MCP — when to use the browser
+
+If the Playwright MCP is available, **use it as your primary research tool** for company-specific datapoints. This is where Playwright gives the biggest advantage over WebSearch/WebFetch — you're visiting specific pages and extracting structured data.
+
+### Datapoint-specific Playwright patterns
+
+**Careers/Hiring signals**:
+1. `browser_navigate` to `{company_domain}/careers` or `{company_domain}/jobs`
+2. `browser_snapshot` to get all open positions
+3. Extract role titles, departments, seniority levels, locations
+4. Count roles per department to identify priorities (hiring 5 engineers vs 1 = engineering is the priority)
+5. If the careers page uses filters, use `browser_fill_form` to filter by department
+
+**Product launches / What they shipped**:
+1. `browser_navigate` to `{company_domain}/blog` or `{company_domain}/changelog`
+2. `browser_snapshot` to get recent posts
+3. Click into the most recent product announcement
+4. Extract what was launched, when, and the language they use
+
+**CEO/Leader podcast appearances**:
+1. WebSearch `"{ceo_name}" podcast {year}` to find episodes
+2. `browser_navigate` to the podcast episode page
+3. `browser_snapshot` to get the episode description, topics discussed, key quotes
+
+**Tech stack signals**:
+1. `browser_navigate` to `{company_domain}`
+2. `browser_evaluate` with `() => { const scripts = Array.from(document.querySelectorAll('script[src]')); return scripts.map(s => s.src); }` to detect loaded JS libraries
+3. Check for common tool indicators: Segment, Mixpanel, Intercom, Drift, HubSpot, etc.
+4. Also check BuiltWith or Wappalyzer pages for the domain
+
+**Press/News**:
+1. `browser_navigate` to `{company_domain}/press` or `{company_domain}/newsroom`
+2. `browser_snapshot` for recent press releases and media coverage
+
+**Company about page**:
+1. `browser_navigate` to `{company_domain}/about`
+2. `browser_snapshot` for team size, mission statement, office locations, founding year
+
+### When to still use WebSearch
+
+- Initial discovery of WHERE to find a datapoint (e.g., "which podcast was the CEO on?")
+- Glassdoor reviews (search for them, then navigate with Playwright)
+- Cross-referencing claims across multiple sources
 
 ## Read context first
 
@@ -66,9 +110,15 @@ Register in SQLite: `python3 scripts/db_manager.py define-datapoints --file data
 ## Mode 2: Research a single company (`research <company>`)
 
 1. Load the datapoint schema from `data/datapoint_schema.json`
-2. For the given company, run web searches for each datapoint
-3. Use WebFetch to read promising results in detail
-4. For each datapoint, record:
+2. For the given company, first get their domain from SQLite
+3. **Use Playwright** to visit the company's website directly:
+   - Careers page for hiring signals
+   - Blog/changelog for product launches
+   - About page for company info
+   - Homepage for tech stack detection (via `browser_evaluate`)
+4. **Use WebSearch** to find external sources (podcasts, press, reviews)
+5. **Use Playwright** to read those external sources in full
+6. For each datapoint, record:
    - The value found (or "not found")
    - The source URL
    - Confidence level (high/medium/low)

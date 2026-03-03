@@ -2,7 +2,7 @@
 name: company-context-builder
 description: Build and maintain company context — ICP, product lingo, win cases, campaign history. Everything starts with context. Also ingests call recordings and Instantly results to compound knowledge across sessions.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_tabs, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_run_code
 argument-hint: "[init | update-from-call <path> | update-from-results <campaign> | show]"
 ---
 
@@ -99,10 +99,22 @@ After collecting answers, write `data/company_context.md` with this structure:
    - Action items
    ```
 
+## Playwright MCP — pull results from Instantly dashboard
+
+If the Playwright MCP is available and the user is logged into Instantly, you can pull campaign results directly from the dashboard instead of relying on the API or manual export:
+
+1. `browser_navigate` to the Instantly campaign analytics page
+2. `browser_snapshot` to extract open rates, reply rates, bounces
+3. `browser_click` into individual replies to classify them (positive/negative/neutral/OOO)
+4. Feed the extracted data into the context update flow below
+
+This is especially useful for `update-from-results` when the Instantly API key isn't configured.
+
 ## When updating from campaign results (update-from-results)
 
 1. Read `data/company_context.md`
-2. Run: `python3 scripts/db_manager.py campaign-results {campaign_name}`
+2. If Playwright is available and user is logged into Instantly, scrape results from the dashboard (see above)
+3. Otherwise run: `python3 scripts/db_manager.py campaign-results {campaign_name}`
 3. Parse the results (open rates, reply rates, bounces, positive/negative replies)
 4. Update the Campaign History section with results
 5. Append to Learnings Log:

@@ -2,13 +2,37 @@
 name: market-problems-deep-research
 description: Deep research on industry problems and what leaders are saying. Not company-specific — this is about educating yourself on the market before personalizing outreach.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_tabs, mcp__plugin_playwright_playwright__browser_run_code
 argument-hint: "<industry or problem area>"
 ---
 
 # Market Problems Deep Research
 
 You are a research engine. Your job is NOT to find company-specific data. Your job is to deeply understand the problems an industry faces so the user can speak the language of their prospects.
+
+## Playwright MCP — when to use the browser
+
+If the Playwright MCP is available, **prefer it over WebFetch** for reading full article content. Use the browser when:
+
+- **JS-rendered content**: Blog posts, reports, and articles on modern sites often require JS to render — Playwright handles this, WebFetch may return empty shells
+- **Research reports and surveys**: Navigate to Gartner, Forrester, McKinsey insight pages and extract the visible content
+- **Conference talk pages**: Navigate to session pages on conference sites to read talk descriptions and speaker bios
+- **Multi-page articles**: Click through "Read more" or pagination to get the full content
+- **Extracting quotes from interview pages**: Navigate to the article, `browser_snapshot` to get the full text including pull quotes
+
+### Playwright deep-read pattern
+
+1. `browser_navigate` to the article/report URL
+2. `browser_snapshot` to get the full accessible text content
+3. Extract quotes, statistics, and key claims from the snapshot
+4. If the page has expandable sections or "show more" buttons, `browser_click` to expand, then `browser_snapshot` again
+5. Use `browser_evaluate` with `() => document.body.innerText` if the snapshot is insufficient — this gets all rendered text
+
+### When to still use WebSearch / WebFetch
+
+- **Discovery phase**: Use `WebSearch` to find which articles, reports, and talks exist
+- **Simple static pages**: `WebFetch` works fine for basic HTML blogs without JS rendering
+- **Parallel research**: `WebSearch` for running 10+ queries simultaneously
 
 ## Read context first
 
@@ -44,7 +68,11 @@ Search for thought leadership:
 - LinkedIn thought leaders in the space
 - Industry-specific publications and blogs
 
-Use WebFetch to read the most relevant articles in full.
+**Use Playwright** (preferred) or WebFetch to read the most relevant articles in full. For each high-value URL from search results:
+1. `browser_navigate` to the URL
+2. `browser_snapshot` to capture the full article text
+3. Extract direct quotes, statistics, and named sources
+4. If content is paywalled or gated, note it and move on — never bypass paywalls
 
 ### Step 3: Identify problem categories
 

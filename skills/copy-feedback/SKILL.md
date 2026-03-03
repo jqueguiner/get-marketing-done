@@ -2,13 +2,52 @@
 name: copy-feedback
 description: Generate a prospect persona and simulate how they'd react to your email cold. Deep-dive their social profiles, industry context, and simulate their honest response. Then refine. Run per prospect.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_tabs, mcp__plugin_playwright_playwright__browser_run_code
 argument-hint: "<company_name> [or] <prospect_name at company>"
 ---
 
 # Copy Feedback — Prospect Persona Simulation
 
 This sounds like BS but it works. You build a detailed persona of the prospect, then read the email through their eyes and simulate their honest reaction. This catches tone-deaf messaging, false assumptions, and weak CTAs before they hit a real inbox.
+
+## Playwright MCP — critical for persona building
+
+If the Playwright MCP is available, **always use it for persona research**. This is the skill where Playwright matters most — you need to read actual social profile content, not just search snippets.
+
+### Persona research with Playwright
+
+**LinkedIn profile** (public view):
+1. WebSearch `"{person_name}" "{company}" site:linkedin.com` to get the profile URL
+2. `browser_navigate` to the LinkedIn URL
+3. `browser_snapshot` to capture:
+   - Current and past job titles (career trajectory)
+   - Education background
+   - Skills and endorsements
+   - Recent activity/posts (if visible)
+   - Recommendations given/received (communication style signal)
+
+**Twitter/X profile**:
+1. WebSearch `"{person_name}" "{company}" site:twitter.com OR site:x.com`
+2. `browser_navigate` to their profile
+3. `browser_snapshot` to capture:
+   - Bio and pinned tweet (what they want to be known for)
+   - Recent tweets and replies (what they actually talk about)
+   - Tone and style (formal? memes? threads? hot takes?)
+   - Who they engage with (industry peers, thought leaders)
+
+**Personal blog or company blog posts**:
+1. `browser_navigate` to any blog URLs found in search
+2. `browser_snapshot` to read their actual writing
+3. Note: writing style, topics they choose, level of technical depth
+
+**Podcast/talk appearances**:
+1. `browser_navigate` to episode pages
+2. `browser_snapshot` to get episode descriptions and show notes
+3. Extract what topics they chose to discuss publicly
+
+### Why Playwright over WebSearch here
+
+WebSearch gives you snippets. Snippets are not enough to simulate a real person. You need to READ their actual posts, their actual writing, their actual career history. Playwright lets you do that.
 
 ## Process
 
@@ -20,11 +59,16 @@ For the given prospect/company in `$ARGUMENTS`:
    `python3 scripts/db_manager.py get-company --name "{company}" --with-datapoints`
 
 2. Deep research the specific person (if named) or the likely recipient (based on ICP title):
-   - WebSearch their name + company
-   - WebSearch their LinkedIn activity (posts, comments, articles)
-   - WebSearch their Twitter/X presence
-   - WebSearch any podcast appearances, conference talks, blog posts
-   - WebSearch their background (previous companies, education)
+   - **WebSearch** to discover profile URLs and content locations:
+     - `"{person_name}" "{company}" site:linkedin.com`
+     - `"{person_name}" "{company}" site:twitter.com OR site:x.com`
+     - `"{person_name}" "{company}" podcast OR interview OR keynote`
+     - `"{person_name}" "{company}" blog OR article`
+   - **Playwright** to read the actual content at each discovered URL:
+     - Navigate to LinkedIn profile, snapshot and extract career history + recent activity
+     - Navigate to Twitter/X profile, snapshot recent posts and bio
+     - Navigate to blog posts / articles they authored
+     - Navigate to podcast episode pages for topics discussed
 
 3. Build a persona profile:
    ```

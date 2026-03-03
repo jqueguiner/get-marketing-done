@@ -2,13 +2,39 @@
 name: list-building
 description: Build prospect lists of 200-500 companies. Two modes — lookalike search from a successful case, or instant search for testing new verticals. Can re-run with refined datapoints from enrichment.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, WebSearch, WebFetch, Agent, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_type, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_tabs, mcp__plugin_playwright_playwright__browser_press_key, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_run_code
 argument-hint: "[lookalike <company_name> | search <criteria> | refine]"
 ---
 
 # List Building
 
 You build targeted prospect lists fast. 200 to 500 companies within seconds. Two modes based on hypothesis type.
+
+## Playwright MCP — when to use the browser
+
+If the Playwright MCP is available, **prefer it over WebFetch** for scraping structured company data from websites. Use the browser when:
+
+- **Scraping directory pages**: Navigate to Crunchbase, G2, Clutch, ProductHunt, BuiltWith, etc. and extract company lists directly from the page DOM
+- **Paginated results**: Use `browser_click` to paginate through result pages and collect all entries
+- **JS-heavy sites**: Many directories render company lists client-side — WebFetch returns empty HTML, Playwright renders the full page
+- **Filtering on-site**: Use `browser_fill_form` to apply filters (industry, size, location) directly on directory search forms before scraping
+- **LinkedIn company search**: Navigate to LinkedIn search, apply filters, snapshot results
+
+### Playwright scraping pattern
+
+1. `browser_navigate` to the directory URL
+2. `browser_snapshot` to get the accessibility tree — this is your structured data source
+3. Parse company names, domains, descriptions from the snapshot
+4. If paginated: `browser_click` the next page link, `browser_wait_for` the new content, `browser_snapshot` again
+5. Repeat until you have enough companies or pages are exhausted
+6. For each company, `browser_navigate` to their profile page on the directory to grab size, industry, location
+7. Fall back to `WebSearch` for directories you can't navigate or when Playwright is unavailable
+
+### When to still use WebSearch
+
+- Initial discovery: finding WHICH directories and lists exist for an industry
+- Broad queries like "competitors of X" or "top {industry} companies"
+- When you need many parallel searches fast (Playwright is single-threaded)
 
 ## Read context first
 
@@ -32,12 +58,16 @@ Use when: "I have a company similar to a successful case"
    - Geography
    - Business model (B2B/B2C, SaaS/services, etc.)
    - Funding stage
-3. Use WebSearch to find similar companies. Run multiple parallel searches:
+3. **Start with WebSearch** to find similar companies and discover relevant directories:
    - `"{industry}" "{business_model}" companies {geography} site:crunchbase.com`
    - `"{industry}" startups {employee_range} employees`
    - `competitors of {reference_company}`
    - `"{sub_industry}" SaaS companies list {year}`
-4. For each search, extract company names and domains
+4. **Then use Playwright** to scrape the most promising directory pages:
+   - Navigate to Crunchbase/G2/ProductHunt search results for the industry
+   - Apply filters matching the reference company's attributes
+   - Paginate through results extracting company names, domains, and metadata
+   - Visit individual company profile pages for size/location/description
 5. Deduplicate results
 6. Store in SQLite: `python3 scripts/db_manager.py add-companies --source lookalike --reference {company_name} --file /tmp/companies_batch.json`
 7. Present results as a table: Company | Domain | Industry | Size | Match Reason
@@ -52,16 +82,17 @@ Use when: Testing demand in a completely new vertical
    - **Geography**: Where?
    - **Signals**: Any specific criteria? (e.g., "recently raised Series A", "hiring for data engineers", "uses Snowflake")
    - **Exclusions**: Any companies or types to skip?
-2. Run aggressive parallel web searches:
-   - Industry directories and lists
-   - Crunchbase / LinkedIn company search patterns
-   - Industry-specific databases
-   - "Top {industry} companies {year}" lists
-   - Trade publication company mentions
-3. For each company found, capture: name, domain, estimated size, location, brief description
-4. Deduplicate and filter against Anti-ICP criteria
-5. Store in SQLite: `python3 scripts/db_manager.py add-companies --source search --criteria "{criteria}" --file /tmp/companies_batch.json`
-6. Present summary: total found, breakdown by sub-segment
+2. **Use WebSearch** to discover relevant directories and initial company lists
+3. **Use Playwright** to scrape those directories at scale:
+   - Navigate to each directory URL
+   - Apply search filters using `browser_fill_form` (industry, size, location)
+   - `browser_snapshot` to extract structured company data from results
+   - Paginate through all result pages
+   - For enriching each found company: visit their profile page on the directory
+4. For each company found, capture: name, domain, estimated size, location, brief description
+5. Deduplicate and filter against Anti-ICP criteria
+6. Store in SQLite: `python3 scripts/db_manager.py add-companies --source search --criteria "{criteria}" --file /tmp/companies_batch.json`
+7. Present summary: total found, breakdown by sub-segment
 
 ## Mode 3: Refined Search (`refine`)
 

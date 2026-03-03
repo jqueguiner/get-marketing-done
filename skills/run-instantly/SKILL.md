@@ -2,13 +2,51 @@
 name: run-instantly
 description: Upload campaigns to Instantly for email sequencing. Prepare CSV, validate data, upload, and create verification checklist. Manual verify before sending.
 user-invocable: true
-allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent
+allowed-tools: Read, Write, Edit, Bash, Grep, Glob, Agent, WebSearch, mcp__plugin_playwright_playwright__browser_navigate, mcp__plugin_playwright_playwright__browser_snapshot, mcp__plugin_playwright_playwright__browser_click, mcp__plugin_playwright_playwright__browser_type, mcp__plugin_playwright_playwright__browser_evaluate, mcp__plugin_playwright_playwright__browser_wait_for, mcp__plugin_playwright_playwright__browser_take_screenshot, mcp__plugin_playwright_playwright__browser_tabs, mcp__plugin_playwright_playwright__browser_fill_form, mcp__plugin_playwright_playwright__browser_select_option, mcp__plugin_playwright_playwright__browser_run_code, mcp__plugin_playwright_playwright__browser_file_upload
 argument-hint: "[prepare <campaign> | upload <campaign> | verify <campaign> | results <campaign>]"
 ---
 
 # Run Instantly — Campaign Upload & Execution
 
 You bridge the gap between email generation and actual sending. Instantly is the email sequencing tool. Your job is to prepare the data, upload it, and create a verification checklist so the user can manually verify before hitting send.
+
+## Playwright MCP — Instantly dashboard automation
+
+If the Playwright MCP is available, **use it to interact with the Instantly dashboard** directly. This is the killer feature — instead of just generating a CSV and telling the user to go upload it manually, you can navigate the dashboard with them.
+
+### Upload flow with Playwright
+
+1. `browser_navigate` to `https://app.instantly.ai/` (user must be logged in)
+2. `browser_snapshot` to check login state
+3. If logged in, navigate to the campaign creation or import page
+4. `browser_file_upload` to upload the prepared CSV directly
+5. `browser_snapshot` to confirm the import was successful and show the user the result
+
+### Verification flow with Playwright
+
+During `verify`, use Playwright to walk through the Instantly dashboard WITH the user:
+1. `browser_navigate` to the campaign page in Instantly
+2. `browser_snapshot` to capture:
+   - Number of contacts imported
+   - Email sequence configuration
+   - Sending schedule settings
+   - Warmup status
+3. `browser_take_screenshot` to give the user a visual of the campaign setup
+4. Cross-check the dashboard data against what's in SQLite
+
+### Results flow with Playwright
+
+During `results`, scrape campaign analytics directly from the dashboard:
+1. `browser_navigate` to the campaign analytics page
+2. `browser_snapshot` to extract:
+   - Open rates, reply rates, bounce rates
+   - Per-email performance in the sequence
+   - Reply content (positive/negative/OOO classification)
+3. Save the scraped results to SQLite automatically
+
+### When Playwright is NOT available
+
+Fall back to CSV-based workflow with manual instructions (the default).
 
 ## Read context first
 
