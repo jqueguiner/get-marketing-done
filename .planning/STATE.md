@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-03T17:40:00Z"
+last_updated: "2026-03-03T18:35:00Z"
 progress:
   total_phases: 8
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 16
-  completed_plans: 2
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,30 +18,30 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Teams can run repeatable outbound campaigns with cumulative context and quality gates, regardless of which supported coding assistant they use
-**Current focus:** Phase 2 - Codex Adapter Foundation
+**Current focus:** Phase 3 - Claude Adapter Parity Refactor
 
 ## Current Position
 
-Phase: 2 of 8 (Codex Adapter Foundation)
+Phase: 3 of 8 (Claude Adapter Parity Refactor)
 Plan: 0 of 2 in current phase
-Status: Phase 1 executed and verified -- ready for Phase 2 planning
-Last activity: 2026-03-03 -- Phase 2 context gathered (strict Codex command + full wiring decisions captured)
+Status: Phase 2 executed and verified -- ready for Phase 3 discussion/planning
+Last activity: 2026-03-03 -- Phase 2 complete (2/2 plans, verification passed)
 
-Progress: [█░░░░░░░░░] 12%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: ~15min
-- Total execution time: ~0.5 hours
+- Total plans completed: 4
+- Average duration: ~13min
+- Total execution time: ~0.9 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-canonical-contracts | 2/2 | ~30min | ~15min |
-| 02-codex-adapter-foundation | 0/2 | — | — |
+| 02-codex-adapter-foundation | 2/2 | ~23min | ~12min |
 | 03-claude-adapter-parity-refactor | 0/2 | — | — |
 | 04-cross-adapter-state-continuity | 0/2 | — | — |
 | 05-verification-gate-consistency | 0/2 | — | — |
@@ -66,11 +66,14 @@ Recent decisions affecting current work:
 - [Execute P1]: Capability matrix policy standardized as `native_wins_alias_warns`
 - [Execute P1]: Ingress routing now attempts native/canonical translation before unknown-command hard fail
 - [Discuss P2]: Codex native surface locked to `$gmd-*` only, unmapped commands hard-fail, full wiring required, full command sweep required
+- [Execute P2]: Unknown Codex native commands now emit `UNKNOWN_CODEX_COMMAND` with structured routing error output
+- [Execute P2]: Full command sweep validator added and passing (16/16 `$gmd-*` commands)
 
 ### Roadmap Evolution
 
 - Phase 1-8 roadmap added: multi-assistant adaptation milestone with Codex-first execution order
 - Phase 1 marked complete on 2026-03-03 (2/2 plans executed)
+- Phase 2 marked complete on 2026-03-03 (2/2 plans executed)
 
 ### Pending Todos
 
@@ -78,11 +81,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 2 needs deeper codex command coverage and validation over real end-to-end stage flows.
+- Phase 3 must preserve existing Claude command behavior while migrating fully onto the shared adapter boundary.
 
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-codex-adapter-foundation/02-CONTEXT.md
-Next: $gsd-plan-phase 2
+Stopped at: Phase 2 complete and verified
+Resume file: .planning/phases/02-codex-adapter-foundation/02-VERIFICATION.md
+Next: $gsd-discuss-phase 3

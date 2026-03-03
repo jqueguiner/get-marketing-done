@@ -7,7 +7,7 @@
 
 ### Adapter Foundation
 
-- [ ] **ADPT-01**: Operator can run the same canonical workflow actions through a Codex-compatible command adapter.
+- [x] **ADPT-01**: Operator can run the same canonical workflow actions through a Codex-compatible command adapter.
 - [ ] **ADPT-02**: Operator can run existing Claude workflow commands without behavioral regression after adapter refactor.
 - [x] **ADPT-03**: Maintainer can define assistant capability metadata in one support matrix used by adapters.
 
@@ -56,7 +56,7 @@
 |-------------|-------|--------|
 | ADPT-03 | Phase 1 | Complete |
 | SAFE-01 | Phase 1 | Complete |
-| ADPT-01 | Phase 2 | Pending |
+| ADPT-01 | Phase 2 | Complete |
 | ADPT-02 | Phase 3 | Pending |
 | CMD-03 | Phase 3 | Pending |
 | CMD-02 | Phase 4 | Pending |
@@ -74,4 +74,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after Phase 1 execution*
+*Last updated: 2026-03-03 after Phase 2 execution*

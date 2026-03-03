@@ -13,7 +13,7 @@ This milestone adapts the existing Claude-first GTM automation system into an as
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Canonical Contracts** - Define canonical workflow actions, adapter interfaces, and provider capability matrix (completed 2026-03-03)
-- [ ] **Phase 2: Codex Adapter Foundation** - Implement Codex-oriented adapter wiring for canonical actions
+- [x] **Phase 2: Codex Adapter Foundation** - Implement Codex-oriented adapter wiring for canonical actions (completed 2026-03-03)
 - [ ] **Phase 3: Claude Adapter Parity Refactor** - Refactor existing Claude integration onto shared adapter interface without regressions
 - [ ] **Phase 4: Cross-Adapter State Continuity** - Ensure pause/resume/progress behavior and persisted state compatibility across adapters
 - [ ] **Phase 5: Verification Gate Consistency** - Enforce manual verification and safety gates uniformly for every adapter
@@ -45,11 +45,11 @@ Plans:
   1. A Codex adapter maps command invocations to canonical workflow actions
   2. Core GTM stage commands execute end-to-end through the Codex adapter
   3. Adapter-specific behavior is isolated to adapter layer files
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 02-01-PLAN.md -- Implement Codex adapter command parser and action translator
-- [ ] 02-02-PLAN.md -- Wire adapter into install/runtime paths and validate baseline workflows
+- [x] 02-01-PLAN.md -- Implement Codex adapter command parser and action translator
+- [x] 02-02-PLAN.md -- Wire adapter into install/runtime paths and validate baseline workflows
 
 ### Phase 3: Claude Adapter Parity Refactor
 **Goal**: Move Claude integration onto the same adapter contract while preserving existing command behavior
@@ -143,7 +143,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Canonical Contracts | 2/2 | Complete   | 2026-03-03 |
-| 2. Codex Adapter Foundation | 0/2 | Not started | — |
+| 2. Codex Adapter Foundation | 2/2 | Complete    | 2026-03-03 |
 | 3. Claude Adapter Parity Refactor | 0/2 | Not started | — |
 | 4. Cross-Adapter State Continuity | 0/2 | Not started | — |
 | 5. Verification Gate Consistency | 0/2 | Not started | — |
