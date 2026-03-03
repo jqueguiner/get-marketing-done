@@ -20,5 +20,12 @@
     "require_enrichment_before_emails": true,
     "require_copy_feedback_before_send": false,
     "manual_verify_before_send": true
+  },
+  "adapters": {
+    "scaffolds": {
+      "gemini": false,
+      "opencode": false,
+      "mistral": false
+    }
   }
 }

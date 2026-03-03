@@ -2,10 +2,16 @@ const { assertValidAction, normalizeActionPayload } = require('./canonical-actio
 const { getProviderCapabilities, getAliasPolicy } = require('./capability-matrix');
 const claudeProvider = require('./providers/claude');
 const codexProvider = require('./providers/codex');
+const geminiProvider = require('./providers/gemini');
+const opencodeProvider = require('./providers/opencode');
+const mistralProvider = require('./providers/mistral');
 
 const PROVIDERS = Object.freeze({
   claude: claudeProvider,
-  codex: codexProvider
+  codex: codexProvider,
+  gemini: geminiProvider,
+  opencode: opencodeProvider,
+  mistral: mistralProvider
 });
 const DEFAULT_PROVIDER = 'claude';
 
@@ -41,11 +47,26 @@ function listSupportedCommands(provider) {
   return Object.keys(map).sort();
 }
 
+function isScaffoldProvider(provider) {
+  const caps = getProviderCapabilities(provider);
+  return Boolean(caps && caps.scaffold);
+}
+
+function isProviderEnabled(provider, config) {
+  if (!isScaffoldProvider(provider)) return true;
+  const scaffoldCfg = config && config.adapters && config.adapters.scaffolds;
+  if (!scaffoldCfg || typeof scaffoldCfg !== 'object') return false;
+  return Boolean(scaffoldCfg[provider]);
+}
+
 function getProviderDiagnostics(provider) {
   const commands = listSupportedCommands(provider);
   const strictNativeCheck = {
     claude: isClaudeNativeCommand,
-    codex: isCodexNativeCommand
+    codex: isCodexNativeCommand,
+    gemini: isClaudeNativeCommand,
+    opencode: isClaudeNativeCommand,
+    mistral: isClaudeNativeCommand
   };
   const checkFn = strictNativeCheck[provider];
   return {
@@ -62,6 +83,16 @@ function routeCommand(input) {
   const command = source.command;
   const params = source.params || {};
   const config = source.config || {};
+
+  if (isScaffoldProvider(provider) && !isProviderEnabled(provider, config)) {
+    const err = new Error(`Scaffold provider '${provider}' is inactive`);
+    err.code = 'SCAFFOLD_PROVIDER_INACTIVE';
+    err.provider = provider;
+    err.command = command;
+    err.capability = `adapters.scaffolds.${provider}`;
+    err.remediation = `Enable config '${err.capability}=true' to activate scaffold provider`;
+    throw err;
+  }
 
   const providerCapabilities = getProviderCapabilities(provider);
   if (!providerCapabilities) return null;
@@ -81,6 +112,15 @@ function routeCommand(input) {
     err.code = 'UNKNOWN_CODEX_COMMAND';
     err.provider = provider;
     err.command = command;
+    throw err;
+  }
+  if (isScaffoldProvider(provider) && isNativeForProvider(provider, command) && !action) {
+    const err = new Error(`Unsupported scaffold native command for ${provider}: ${command}`);
+    err.code = 'SCAFFOLD_CAPABILITY_UNSUPPORTED';
+    err.provider = provider;
+    err.command = command;
+    err.capability = 'native_command_map';
+    err.remediation = 'Use a supported scaffold command or extend provider commandMap.';
     throw err;
   }
 
@@ -122,6 +162,8 @@ function routeCommand(input) {
 module.exports = {
   DEFAULT_PROVIDER,
   normalizeProvider,
+  isScaffoldProvider,
+  isProviderEnabled,
   isClaudeNativeCommand,
   isCodexNativeCommand,
   getProviderDiagnostics,

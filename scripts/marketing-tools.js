@@ -624,6 +624,13 @@ function configEnsure() {
       require_copy_feedback_before_send: false,
       manual_verify_before_send: true,
     },
+    adapters: {
+      scaffolds: {
+        gemini: false,
+        opencode: false,
+        mistral: false,
+      }
+    }
   };
 
   function merge(target, source) {
@@ -830,6 +837,7 @@ function main() {
   var cmd = args[0];
   var cmdArgs = args.slice(1);
   var provider = getRuntimeProvider();
+  var currentConfig = readJSON(CONFIG_PATH) || {};
   var resolvedAction = null;
 
   if (!cmd || cmd === 'help') {
@@ -847,7 +855,9 @@ function main() {
         provider: provider,
         command: cmd,
         params: {},
-        config: { aliases: process.env.GMD_ALIASES === '1' || process.env.GMD_ALIASES === 'true' }
+        config: Object.assign({}, currentConfig, {
+          aliases: process.env.GMD_ALIASES === '1' || process.env.GMD_ALIASES === 'true'
+        })
       });
     } catch (err) {
       console.error(JSON.stringify({
@@ -855,6 +865,8 @@ function main() {
         code: err.code || 'ROUTING_ERROR',
         provider: err.provider || provider,
         command: err.command || cmd,
+        capability: err.capability || null,
+        remediation: err.remediation || null,
         provider_native: listSupportedCommands(provider)
       }));
       process.exit(1);
@@ -874,7 +886,6 @@ function main() {
     }
   }
 
-  var currentConfig = readJSON(CONFIG_PATH) || {};
   var currentState = parseStateFrontmatter(readFile(STATE_PATH));
   var gateResult = evaluateQualityGates({
     provider: provider,

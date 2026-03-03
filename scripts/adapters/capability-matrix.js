@@ -5,6 +5,7 @@
 
 const CAPABILITY_MATRIX = Object.freeze({
   claude: Object.freeze({
+    scaffold: false,
     native_command_prefixes: ['/gmd:'],
     supports: Object.freeze({
       inline_options: true,
@@ -16,6 +17,7 @@ const CAPABILITY_MATRIX = Object.freeze({
     conflict_policy: 'native_wins_alias_warns'
   }),
   codex: Object.freeze({
+    scaffold: false,
     native_command_prefixes: ['$gmd-'],
     supports: Object.freeze({
       inline_options: true,
@@ -27,6 +29,7 @@ const CAPABILITY_MATRIX = Object.freeze({
     conflict_policy: 'native_wins_alias_warns'
   }),
   gemini: Object.freeze({
+    scaffold: true,
     native_command_prefixes: ['/gmd:'],
     supports: Object.freeze({
       inline_options: true,
@@ -38,6 +41,7 @@ const CAPABILITY_MATRIX = Object.freeze({
     conflict_policy: 'native_wins_alias_warns'
   }),
   opencode: Object.freeze({
+    scaffold: true,
     native_command_prefixes: ['/gmd:'],
     supports: Object.freeze({
       inline_options: true,
@@ -49,6 +53,7 @@ const CAPABILITY_MATRIX = Object.freeze({
     conflict_policy: 'native_wins_alias_warns'
   }),
   mistral: Object.freeze({
+    scaffold: true,
     native_command_prefixes: ['/gmd:'],
     supports: Object.freeze({
       inline_options: true,

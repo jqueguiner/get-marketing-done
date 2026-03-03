@@ -30,6 +30,7 @@ const COMMAND_PREFIX = 'gmd';
 const COMMANDS_DIR_NAME = path.join('commands', COMMAND_PREFIX);
 const CODEX_COMMAND_PREFIX = '$gmd-';
 const CODEX_COMMANDS_DIR_NAME = path.join('commands', 'gmd-codex');
+const SCAFFOLD_PROVIDERS = ['gemini', 'opencode', 'mistral'];
 const MANIFEST_NAME = 'gmd-file-manifest.json';
 const PATCHES_DIR_NAME = 'gmd-local-patches';
 const PKG_ROOT = path.join(__dirname, '..');
@@ -724,6 +725,9 @@ ${commandNames.map(n => '    ' + dim + n + reset).join('\n')}
 
   Codex-native commands:
 ${codexCommandNames.map(n => '    ' + dim + n + reset).join('\n')}
+
+  Scaffold adapters (Phase 7, disabled by default):
+${SCAFFOLD_PROVIDERS.map(n => '    ' + dim + n + ': set adapters.scaffolds.' + n + '=true in config.json to activate' + reset).join('\n')}
 `);
 }
 
