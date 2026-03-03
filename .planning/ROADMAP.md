@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Canonical workflow action schema is documented and referenced by all adapters
   2. Provider capability matrix defines supported tools, hook semantics, and constraints per assistant
   3. Core workflow logic no longer requires assistant-specific branches for action dispatch
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
 - [ ] 01-01-PLAN.md -- Define action contracts, adapter interface, and capability matrix artifacts
