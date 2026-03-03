@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-03T22:18:05Z"
+last_updated: "2026-03-03T22:46:29Z"
 progress:
   total_phases: 8
   completed_phases: 5
@@ -76,6 +76,7 @@ Recent decisions affecting current work:
 - [Execute P4]: Cross-adapter continuity validator added (`verify_cross_adapter_continuity.js`) and passing; CMD-02 and SAFE-03 closed
 - [Discuss P5]: Gate authority locked to shared runtime policy with config-backed quality gates and identical Claude/Codex enforcement behavior
 - [Execute P5]: Runtime quality gates centralized with adapter-uniform block contract; validator (`verify_quality_gate_consistency.js`) passing and SAFE-02 closed
+- [Discuss P6]: Parity harness scope locked to critical flows (init/progress/pause-resume/send-prepare) with hybrid strict/semantic checks and requirement-tagged JSON diagnostics
 
 ### Roadmap Evolution
 
@@ -97,6 +98,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 5 execution complete
-Resume file: .planning/phases/05-verification-gate-consistency/05-VERIFICATION.md
-Next: $gsd-discuss-phase 6
+Stopped at: Phase 6 discussion complete
+Resume file: .planning/phases/06-parity-test-harness/06-CONTEXT.md
+Next: $gsd-plan-phase 6
