@@ -33,9 +33,9 @@
 
 ### Additional Adapter Coverage
 
-- **ADPT-04**: Operator can use Gemini-oriented adapter commands with parity guarantees.
-- **ADPT-05**: Operator can use OpenCode-oriented adapter commands with parity guarantees.
-- **ADPT-06**: Operator can use Mistral-compatible adapter patterns with parity guarantees.
+- [x] **ADPT-04**: Operator can use Gemini-oriented adapter commands with parity guarantees.
+- [x] **ADPT-05**: Operator can use OpenCode-oriented adapter commands with parity guarantees.
+- [x] **ADPT-06**: Operator can use Mistral-compatible adapter patterns with parity guarantees.
 
 ### Advanced Validation
 
@@ -65,6 +65,9 @@
 | CMD-01 | Phase 6 | Complete |
 | QUAL-01 | Phase 6 | Complete |
 | QUAL-02 | Phase 6 | Complete |
+| ADPT-04 | Phase 7 | Complete |
+| ADPT-05 | Phase 7 | Complete |
+| ADPT-06 | Phase 7 | Complete |
 | DOC-01 | Phase 8 | Pending |
 
 **Coverage:**
@@ -74,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after Phase 6 execution*
+*Last updated: 2026-03-03 after Phase 7 execution*

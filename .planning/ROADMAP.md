@@ -118,8 +118,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 07-01-PLAN.md -- Add adapter scaffold templates and registration hooks
-- [ ] 07-02-PLAN.md -- Validate scaffold conformance with parity runner
+- [x] 07-01-PLAN.md -- Add adapter scaffold templates and registration hooks
+- [x] 07-02-PLAN.md -- Validate scaffold conformance with parity runner
 
 ### Phase 8: Docs and Migration Guide
 **Goal**: Publish clear setup, compatibility, and migration documentation for multi-assistant support
@@ -148,5 +148,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. Cross-Adapter State Continuity | 2/2 | Complete   | 2026-03-03 |
 | 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
 | 6. Parity Test Harness | 2/2 | Complete    | 2026-03-03 |
-| 7. Additional Adapter Scaffolds | 2/2 | Complete   | 2026-03-03 |
+| 7. Additional Adapter Scaffolds | 2/2 | Complete    | 2026-03-03 |
 | 8. Docs and Migration Guide | 0/2 | Not started | — |

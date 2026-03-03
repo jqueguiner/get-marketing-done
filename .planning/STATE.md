@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-03T23:45:39Z"
+last_updated: "2026-03-04T00:15:00Z"
 progress:
   total_phases: 8
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 16
-  completed_plans: 12
+  completed_plans: 14
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Teams can run repeatable outbound campaigns with cumulative context and quality gates, regardless of which supported coding assistant they use
-**Current focus:** Phase 7 - Additional Adapter Scaffolds
+**Current focus:** Phase 8 - Docs and Migration Guide
 
 ## Current Position
 
-Phase: 7 of 8 (Additional Adapter Scaffolds)
-Plan: 2 planned (0 executed) in current phase
-Status: Phase 7 planned -- ready for Phase 7 execution
-Last activity: 2026-03-03 -- Phase 7 planning complete (2 plans validated)
+Phase: 8 of 8 (Docs and Migration Guide)
+Plan: 0 planned (0 executed) in current phase
+Status: Phase 7 complete -- ready for Phase 8 discussion/planning
+Last activity: 2026-03-03 -- Phase 7 execution complete (2/2 plans, scaffold conformance validated)
 
-Progress: [███████░░░] 75%
+Progress: [█████████░] 88%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 14
 - Average duration: ~13min
-- Total execution time: ~2.2 hours
+- Total execution time: ~2.6 hours
 
 **By Phase:**
 
@@ -46,7 +46,7 @@ Progress: [███████░░░] 75%
 | 04-cross-adapter-state-continuity | 2/2 | ~25min | ~12min |
 | 05-verification-gate-consistency | 2/2 | ~22min | ~11min |
 | 06-parity-test-harness | 2/2 | ~20min | ~10min |
-| 07-additional-adapter-scaffolds | 0/2 | — | — (planned) |
+| 07-additional-adapter-scaffolds | 2/2 | ~27min | ~13min |
 | 08-docs-and-migration-guide | 0/2 | — | — |
 
 *Updated after each plan completion*
@@ -81,6 +81,7 @@ Recent decisions affecting current work:
 - [Execute P6]: Parity orchestrator and command-flow smoke suite added; CMD-01, QUAL-01, and QUAL-02 closed with passing verification evidence
 - [Discuss P7]: Scaffold providers locked to minimal command maps, hard-fail unknowns, config-gated activation, and structured capability-gap diagnostics
 - [Plan P7]: Execution split into scaffold registration/gating (wave 1) then scaffold conformance validation + readiness evidence (wave 2)
+- [Execute P7]: Gemini/OpenCode/Mistral scaffolds added with config gates and conformance validator (`verify_scaffold_conformance.js`); ADPT-04/05/06 readiness closed
 
 ### Roadmap Evolution
 
@@ -91,6 +92,7 @@ Recent decisions affecting current work:
 - Phase 4 marked complete on 2026-03-03 (2/2 plans executed)
 - Phase 5 marked complete on 2026-03-03 (2/2 plans executed)
 - Phase 6 marked complete on 2026-03-03 (2/2 plans executed)
+- Phase 7 marked complete on 2026-03-03 (2/2 plans executed)
 
 ### Pending Todos
 
@@ -98,11 +100,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 5 must enforce manual verification/send-safety gates uniformly across adapters without bypass paths.
+- None active.
 
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 7 planning complete
-Resume file: .planning/phases/07-additional-adapter-scaffolds/07-02-PLAN.md
-Next: $gsd-execute-phase 7
+Stopped at: Phase 7 execution complete
+Resume file: .planning/phases/07-additional-adapter-scaffolds/07-VERIFICATION.md
+Next: $gsd-discuss-phase 8
