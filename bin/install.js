@@ -28,6 +28,8 @@ const forceStatusline = args.includes('--force-statusline');
 const INSTALL_DIR_NAME = 'get-marketing-done';
 const COMMAND_PREFIX = 'gmd';
 const COMMANDS_DIR_NAME = path.join('commands', COMMAND_PREFIX);
+const CODEX_COMMAND_PREFIX = '$gmd-';
+const CODEX_COMMANDS_DIR_NAME = path.join('commands', 'gmd-codex');
 const MANIFEST_NAME = 'gmd-file-manifest.json';
 const PATCHES_DIR_NAME = 'gmd-local-patches';
 const PKG_ROOT = path.join(__dirname, '..');
@@ -332,6 +334,27 @@ function convertSkillToCommand(skillFile, pathPrefix) {
 }
 
 /**
+ * Convert a SKILL.md into a Codex-native command .md ($gmd-* surface).
+ */
+function convertSkillToCodexCommand(skillFile, pathPrefix) {
+  let content = convertSkillToCommand(skillFile, pathPrefix);
+
+  // Frontmatter command name: gmd:skill-name -> $gmd-skill-name
+  content = content.replace(
+    /^(name:\s*)gmd:([^\n]+)$/m,
+    '$1' + CODEX_COMMAND_PREFIX + '$2'
+  );
+
+  // Rewrite slash command references to codex native command style
+  for (const skillName of SKILL_NAMES) {
+    const re = new RegExp('/' + COMMAND_PREFIX + ':' + skillName.replace(/-/g, '\\-') + '\\b', 'g');
+    content = content.replace(re, CODEX_COMMAND_PREFIX + skillName);
+  }
+
+  return content;
+}
+
+/**
  * Copy source directory to dest, applying path replacements in .md files.
  * Deletes dest first for clean install (prevents orphaned files).
  */
@@ -495,7 +518,9 @@ function install(isGlobal) {
 
   // 4. Convert skills to commands
   const commandsDir = path.join(targetDir, COMMANDS_DIR_NAME);
+  const codexCommandsDir = path.join(targetDir, CODEX_COMMANDS_DIR_NAME);
   fs.mkdirSync(commandsDir, { recursive: true });
+  fs.mkdirSync(codexCommandsDir, { recursive: true });
 
   const skills = discoverSkills();
   // Clean existing command files first
@@ -506,15 +531,31 @@ function install(isGlobal) {
       }
     }
   }
+  if (fs.existsSync(codexCommandsDir)) {
+    for (const file of fs.readdirSync(codexCommandsDir)) {
+      if (file.endsWith('.md')) {
+        fs.unlinkSync(path.join(codexCommandsDir, file));
+      }
+    }
+  }
   for (const skill of skills) {
     const commandContent = convertSkillToCommand(skill.path, pathPrefix);
     const commandFile = path.join(commandsDir, skill.name + '.md');
     fs.writeFileSync(commandFile, commandContent);
+
+    const codexCommandContent = convertSkillToCodexCommand(skill.path, pathPrefix);
+    const codexCommandFile = path.join(codexCommandsDir, skill.name + '.md');
+    fs.writeFileSync(codexCommandFile, codexCommandContent);
   }
   if (verifyInstalled(commandsDir, 'commands/' + COMMAND_PREFIX)) {
     console.log(`  ${green}✓${reset} Installed ${skills.length} commands to commands/${COMMAND_PREFIX}/`);
   } else {
     failures.push('commands/' + COMMAND_PREFIX);
+  }
+  if (verifyInstalled(codexCommandsDir, 'commands/gmd-codex')) {
+    console.log(`  ${green}✓${reset} Installed ${skills.length} Codex commands to commands/gmd-codex/`);
+  } else {
+    failures.push('commands/gmd-codex');
   }
 
   // 5. Write VERSION file
@@ -668,6 +709,7 @@ function finishInstall(settingsPath, settings, statuslineCommand, shouldInstallS
   writeSettings(settingsPath, settings);
 
   const commandNames = discoverSkills().map(s => '/' + COMMAND_PREFIX + ':' + s.name).sort();
+  const codexCommandNames = discoverSkills().map(s => CODEX_COMMAND_PREFIX + s.name).sort();
   const configPath = '~/.claude/' + INSTALL_DIR_NAME + '/config.json';
 
   console.log(`
@@ -679,6 +721,9 @@ function finishInstall(settingsPath, settings, statuslineCommand, shouldInstallS
 
   Available commands:
 ${commandNames.map(n => '    ' + dim + n + reset).join('\n')}
+
+  Codex-native commands:
+${codexCommandNames.map(n => '    ' + dim + n + reset).join('\n')}
 `);
 }
 
@@ -711,6 +756,12 @@ function uninstall(isGlobal) {
     fs.rmSync(commandsDir, { recursive: true });
     removedCount++;
     console.log(`  ${green}✓${reset} Removed commands/${COMMAND_PREFIX}/`);
+  }
+  const codexCommandsDir = path.join(targetDir, CODEX_COMMANDS_DIR_NAME);
+  if (fs.existsSync(codexCommandsDir)) {
+    fs.rmSync(codexCommandsDir, { recursive: true });
+    removedCount++;
+    console.log(`  ${green}✓${reset} Removed commands/gmd-codex/`);
   }
 
   // 2. Remove install directory (except data/)

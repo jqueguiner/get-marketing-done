@@ -606,12 +606,24 @@ function main() {
   }
 
   if (!(cmd in COMMANDS)) {
-    var routed = routeCommand({
-      provider: provider,
-      command: cmd,
-      params: {},
-      config: { aliases: process.env.GMD_ALIASES === '1' || process.env.GMD_ALIASES === 'true' }
-    });
+    var routed = null;
+    try {
+      routed = routeCommand({
+        provider: provider,
+        command: cmd,
+        params: {},
+        config: { aliases: process.env.GMD_ALIASES === '1' || process.env.GMD_ALIASES === 'true' }
+      });
+    } catch (err) {
+      console.error(JSON.stringify({
+        error: err.message,
+        code: err.code || 'ROUTING_ERROR',
+        provider: err.provider || provider,
+        command: err.command || cmd,
+        provider_native: listSupportedCommands(provider)
+      }));
+      process.exit(1);
+    }
     if (routed && ACTION_TO_COMMAND[routed.action] && (ACTION_TO_COMMAND[routed.action] in COMMANDS)) {
       cmd = ACTION_TO_COMMAND[routed.action];
     } else {
