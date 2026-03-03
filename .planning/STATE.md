@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-03T23:08:04Z"
+last_updated: "2026-03-03T23:43:15Z"
 progress:
   total_phases: 8
   completed_phases: 6
@@ -79,6 +79,7 @@ Recent decisions affecting current work:
 - [Discuss P6]: Parity harness scope locked to critical flows (init/progress/pause-resume/send-prepare) with hybrid strict/semantic checks and requirement-tagged JSON diagnostics
 - [Plan P6]: Execution split into parity orchestrator foundation (wave 1) then critical flow smoke + requirement closure artifacts (wave 2)
 - [Execute P6]: Parity orchestrator and command-flow smoke suite added; CMD-01, QUAL-01, and QUAL-02 closed with passing verification evidence
+- [Discuss P7]: Scaffold providers locked to minimal command maps, hard-fail unknowns, config-gated activation, and structured capability-gap diagnostics
 
 ### Roadmap Evolution
 
@@ -101,6 +102,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 6 execution complete
-Resume file: .planning/phases/06-parity-test-harness/06-VERIFICATION.md
-Next: $gsd-discuss-phase 7
+Stopped at: Phase 7 discussion complete
+Resume file: .planning/phases/07-additional-adapter-scaffolds/07-CONTEXT.md
+Next: $gsd-plan-phase 7
