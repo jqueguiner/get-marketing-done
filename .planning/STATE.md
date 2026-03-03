@@ -24,8 +24,8 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 
 Phase: 4 of 8 (Cross-Adapter State Continuity)
 Plan: 0 of 2 in current phase
-Status: Phase 3 executed and verified -- ready for Phase 4 discussion/planning
-Last activity: 2026-03-03 -- Phase 3 complete (2/2 plans, verification passed)
+Status: Phase 4 planned -- ready for execution
+Last activity: 2026-03-03 -- Phase 4 research and plans created (`04-RESEARCH.md`, `04-01/02-PLAN.md`)
 
 Progress: [███░░░░░░░] 38%
 
@@ -72,6 +72,7 @@ Recent decisions affecting current work:
 - [Plan P3]: Execution split into two waves: contract-parity refactor then tagged-baseline parity gate for progress/verify
 - [Execute P3]: Claude parity gate added (`verify_claude_parity.js`) and passing against baseline `v1.1.1`; ADPT-02 and CMD-03 closed
 - [Discuss P4]: Resume priority locked to continue-file > STATE > computed snapshot, with newest-artifact conflict rule and structured fallback warnings
+- [Plan P4]: Execution split into runtime continuity contract (wave 1) then cross-adapter continuity scenario validation (wave 2)
 
 ### Roadmap Evolution
 
@@ -91,6 +92,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 4 discussion complete
-Resume file: .planning/phases/04-cross-adapter-state-continuity/04-CONTEXT.md
-Next: $gsd-plan-phase 4
+Stopped at: Phase 4 planning complete
+Resume file: .planning/phases/04-cross-adapter-state-continuity/04-01-PLAN.md
+Next: $gsd-execute-phase 4

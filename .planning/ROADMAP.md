@@ -73,7 +73,7 @@ Plans:
   1. Pause in one adapter can resume correctly from another adapter
   2. STATE/DB artifacts remain backward compatible
   3. Progress state transitions are consistent across adapters
-**Plans:** 0 plans
+**Plans:** 0/2 plans executed
 
 Plans:
 - [ ] 04-01-PLAN.md -- Normalize adapter metadata and state bridge fields
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Canonical Contracts | 2/2 | Complete   | 2026-03-03 |
 | 2. Codex Adapter Foundation | 2/2 | Complete    | 2026-03-03 |
 | 3. Claude Adapter Parity Refactor | 2/2 | Complete   | 2026-03-03 |
-| 4. Cross-Adapter State Continuity | 0/2 | Not started | — |
+| 4. Cross-Adapter State Continuity | 0/2 | Planned    |  |
 | 5. Verification Gate Consistency | 0/2 | Not started | — |
 | 6. Parity Test Harness | 0/2 | Not started | — |
 | 7. Additional Adapter Scaffolds | 0/2 | Not started | — |
