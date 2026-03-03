@@ -91,6 +91,17 @@ Every step builds on the last. Results feed back to the beginning.
 
 ## Commands
 
+### Multi-Assistant Command Compatibility
+
+- Native assistant commands remain the primary interface.
+- Canonical aliases are available in adapter mode using `gmd:<action>`.
+- Alias mode is opt-in (disabled by default).
+- On collisions, native commands take precedence and alias routing warns.
+
+Examples:
+- Claude-native: `/gmd:campaign-progress`
+- Canonical alias (with alias mode enabled): `gmd:campaign.progress`
+
 ### Core Workflow
 
 | Command | Arguments | Example |
