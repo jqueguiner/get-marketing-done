@@ -1,5 +1,6 @@
 const { ACTIONS } = require('../canonical-actions');
 
+// Codex native surface is strictly `$gmd-*` commands.
 const COMMAND_MAP = Object.freeze({
   '$gmd-campaign-progress': ACTIONS.CAMPAIGN_PROGRESS,
   '$gmd-campaign-verify': ACTIONS.CAMPAIGN_VERIFY,
