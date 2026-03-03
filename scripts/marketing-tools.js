@@ -12,7 +12,12 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { routeCommand, listSupportedCommands } = require('./adapters/command-router');
+const {
+  routeCommand,
+  listSupportedCommands,
+  normalizeProvider,
+  DEFAULT_PROVIDER
+} = require('./adapters/command-router');
 
 const ROOT = path.resolve(__dirname, '..');
 const DATA = path.join(ROOT, 'data');
@@ -70,6 +75,108 @@ function progressBar(pct, width = 20) {
 }
 
 function now() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
+function nowIso() { return new Date().toISOString(); }
+
+function parseTimestamp(value) {
+  if (!value || typeof value !== 'string') return null;
+  const raw = value.trim();
+  if (!raw) return null;
+  const normalized = raw.includes('T') ? raw : raw.replace(' ', 'T');
+  const parsed = Date.parse(normalized);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function parseContinueMetadata(content) {
+  if (!content || typeof content !== 'string') {
+    return { timestamp_ms: null, paused_at: null, provider: null, parse_error: false };
+  }
+
+  const pausedMatch = content.match(/^>\s*Paused:\s*(.+)$/m);
+  const providerMatch = content.match(/^>\s*Provider:\s*(.+)$/m);
+  const pausedAt = pausedMatch ? pausedMatch[1].trim() : null;
+  const provider = providerMatch ? providerMatch[1].trim() : null;
+  const timestampMs = parseTimestamp(pausedAt);
+  return {
+    timestamp_ms: timestampMs,
+    paused_at: pausedAt,
+    provider: provider || null,
+    parse_error: pausedAt !== null && timestampMs === null
+  };
+}
+
+function isValidStateFrontmatter(stateFm, rawState) {
+  if (!stateFm || typeof stateFm !== 'object') return false;
+  if (Object.keys(stateFm).length === 0) {
+    return Boolean(rawState && rawState.trim().length > 0) ? false : true;
+  }
+  return true;
+}
+
+function getStateTimestampMs(stateFm) {
+  return parseTimestamp(stateFm.paused_at || stateFm.last_activity || null);
+}
+
+function resolveResumeSource(opts) {
+  const warnings = [];
+  const hasContinue = Boolean(opts.hasContinue);
+  const continueMeta = opts.continueMeta || {};
+  const stateValid = isValidStateFrontmatter(opts.stateFm, opts.rawState);
+  const stateTimestamp = getStateTimestampMs(opts.stateFm || {});
+  const continueTimestamp = continueMeta.timestamp_ms || null;
+  const continueValid = hasContinue && !continueMeta.parse_error;
+
+  if (continueValid && stateValid && continueTimestamp !== null && stateTimestamp !== null) {
+    if (continueTimestamp > stateTimestamp) {
+      return { source: 'continue_file', reason: 'newer_timestamp', warnings };
+    }
+    if (stateTimestamp > continueTimestamp) {
+      return { source: 'state_frontmatter', reason: 'newer_timestamp', warnings };
+    }
+    return { source: 'continue_file', reason: 'timestamp_tie_precedence', warnings };
+  }
+
+  if (continueValid) {
+    return { source: 'continue_file', reason: 'priority_precedence', warnings };
+  }
+
+  if (hasContinue && continueMeta.parse_error) {
+    warnings.push({
+      warning_code: 'RESUME_SOURCE_FALLBACK',
+      from: 'continue_file',
+      to: stateValid ? 'state_frontmatter' : 'pipeline_snapshot',
+      reason: 'invalid_or_unparseable_continue_file'
+    });
+  } else if (hasContinue && !continueValid) {
+    warnings.push({
+      warning_code: 'RESUME_SOURCE_FALLBACK',
+      from: 'continue_file',
+      to: stateValid ? 'state_frontmatter' : 'pipeline_snapshot',
+      reason: 'missing_or_invalid_continue_file'
+    });
+  }
+
+  if (stateValid && stateTimestamp !== null) {
+    return { source: 'state_frontmatter', reason: 'priority_precedence', warnings };
+  }
+  if (stateValid) {
+    return { source: 'state_frontmatter', reason: 'timestamp_unavailable', warnings };
+  }
+
+  if (opts.rawState && opts.rawState.trim().length > 0) {
+    warnings.push({
+      warning_code: 'RESUME_SOURCE_FALLBACK',
+      from: 'state_frontmatter',
+      to: 'pipeline_snapshot',
+      reason: 'invalid_or_unparseable_state_frontmatter'
+    });
+  }
+
+  return { source: 'pipeline_snapshot', reason: 'fallback_default', warnings };
+}
+
+function getRuntimeProvider() {
+  return normalizeProvider(process.env.GMD_PROVIDER || DEFAULT_PROVIDER);
+}
 
 // ─── Init Commands (single-call bootstrap) ───
 
@@ -210,27 +317,49 @@ function initOutreach(campaign) {
 }
 
 function initResume() {
-  const state = readFile(STATE_PATH);
-  const stateFm = parseStateFrontmatter(state);
+  const rawState = readFile(STATE_PATH);
+  const stateFm = parseStateFrontmatter(rawState);
   const continueFile = path.join(DATA, '.continue-here.md');
   const hasContinue = fileExists(continueFile);
   const continueContent = hasContinue ? readFile(continueFile) : null;
+  const continueMeta = parseContinueMetadata(continueContent);
+  const runtimeProvider = getRuntimeProvider();
+  const resolved = resolveResumeSource({
+    hasContinue: hasContinue,
+    continueMeta: continueMeta,
+    stateFm: stateFm,
+    rawState: rawState
+  });
+  stateSet('last_provider', runtimeProvider);
 
   return {
     timestamp: now(),
-    has_state: !!state,
+    has_state: !!rawState,
     state: stateFm,
     has_continue_file: hasContinue,
     continue_content: continueContent,
+    continue_metadata: {
+      paused_at: continueMeta.paused_at,
+      provider: continueMeta.provider
+    },
     has_context: fileExists(CONTEXT_PATH),
     has_db: fileExists(DB_PATH),
     pipeline: initCampaign(null).pipeline,
-    suggested_action: determineSuggestedAction(stateFm, hasContinue),
+    resume_source: resolved.source,
+    resume_reason: resolved.reason,
+    warnings: resolved.warnings,
+    provider_provenance: {
+      runtime_provider: runtimeProvider,
+      last_provider: stateFm.last_provider || continueMeta.provider || null,
+      paused_by_provider: stateFm.paused_by_provider || continueMeta.provider || null
+    },
+    suggested_action: determineSuggestedAction(stateFm, resolved.source),
   };
 }
 
-function determineSuggestedAction(stateFm, hasContinue) {
-  if (hasContinue) return 'resume_from_continue_file';
+function determineSuggestedAction(stateFm, resumeSource) {
+  if (resumeSource === 'continue_file') return 'resume_from_continue_file';
+  if (resumeSource === 'state_frontmatter') return 'resume_from_state_frontmatter';
   if (!stateFm.current_step) return 'start_fresh';
   const step = parseInt(stateFm.current_step) || 0;
   const actions = {
@@ -352,7 +481,10 @@ function progress() {
       };
     }),
     pipeline: pipeline,
-    next_action: determineSuggestedAction(state, fileExists(path.join(DATA, '.continue-here.md'))),
+    next_action: determineSuggestedAction(
+      state,
+      fileExists(path.join(DATA, '.continue-here.md')) ? 'continue_file' : 'state_frontmatter'
+    ),
   };
 }
 
@@ -423,13 +555,20 @@ function verify(campaign) {
 function pause(reason) {
   var state = parseStateFrontmatter(readFile(STATE_PATH));
   var pipeline = initCampaign(null).pipeline;
+  var runtimeProvider = getRuntimeProvider();
 
-  var continueContent = '# Continue Here\n> Paused: ' + now() + '\n> Reason: ' + (reason || 'Manual pause') + '\n\n## Position\n- Step: ' + (state.current_step || 0) + ' \u2014 ' + (state.current_step_name || 'Unknown') + '\n- Campaign: ' + (state.current_campaign || '(none)') + '\n\n## Pipeline at pause\n- Companies: ' + pipeline.companies + '\n- Enriched: ' + pipeline.companies_enriched + ' (' + pipeline.enrichment_rate + '%)\n- Emails: ' + pipeline.emails_generated + '\n\n## What was happening\n' + (reason || 'No reason provided') + '\n\n## Next action when resuming\n' + determineSuggestedAction(state, false) + '\n';
+  var continueContent = '# Continue Here\n> Paused: ' + now() + '\n> Provider: ' + runtimeProvider + '\n> Reason: ' + (reason || 'Manual pause') + '\n\n## Position\n- Step: ' + (state.current_step || 0) + ' \u2014 ' + (state.current_step_name || 'Unknown') + '\n- Campaign: ' + (state.current_campaign || '(none)') + '\n\n## Pipeline at pause\n- Companies: ' + pipeline.companies + '\n- Enriched: ' + pipeline.companies_enriched + ' (' + pipeline.enrichment_rate + '%)\n- Emails: ' + pipeline.emails_generated + '\n\n## What was happening\n' + (reason || 'No reason provided') + '\n\n## Next action when resuming\n' + determineSuggestedAction(state, 'state_frontmatter') + '\n';
 
   fs.writeFileSync(path.join(DATA, '.continue-here.md'), continueContent);
   stateSet('paused_at', now());
   stateSet('pause_reason', reason || 'Manual pause');
-  return { paused: true, continue_file: path.join(DATA, '.continue-here.md') };
+  stateSet('paused_by_provider', runtimeProvider);
+  stateSet('last_provider', runtimeProvider);
+  return {
+    paused: true,
+    continue_file: path.join(DATA, '.continue-here.md'),
+    provider: runtimeProvider
+  };
 }
 
 function clearContinue() {
@@ -595,7 +734,7 @@ function main() {
   var args = process.argv.slice(2);
   var cmd = args[0];
   var cmdArgs = args.slice(1);
-  var provider = process.env.GMD_PROVIDER || 'claude';
+  var provider = getRuntimeProvider();
 
   if (!cmd || cmd === 'help') {
     console.log(JSON.stringify({

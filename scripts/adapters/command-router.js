@@ -7,6 +7,11 @@ const PROVIDERS = Object.freeze({
   claude: claudeProvider,
   codex: codexProvider
 });
+const DEFAULT_PROVIDER = 'claude';
+
+function normalizeProvider(provider) {
+  return PROVIDERS[provider] ? provider : DEFAULT_PROVIDER;
+}
 
 function isCodexNativeCommand(command) {
   return typeof command === 'string' && command.startsWith('$gmd-');
@@ -53,7 +58,7 @@ function getProviderDiagnostics(provider) {
 
 function routeCommand(input) {
   const source = input && typeof input === 'object' ? input : {};
-  const provider = source.provider || 'claude';
+  const provider = normalizeProvider(source.provider || DEFAULT_PROVIDER);
   const command = source.command;
   const params = source.params || {};
   const config = source.config || {};
@@ -114,6 +119,8 @@ function routeCommand(input) {
 }
 
 module.exports = {
+  DEFAULT_PROVIDER,
+  normalizeProvider,
   isClaudeNativeCommand,
   isCodexNativeCommand,
   getProviderDiagnostics,
