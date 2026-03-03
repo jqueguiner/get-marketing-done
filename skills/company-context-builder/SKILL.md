@@ -10,6 +10,16 @@ argument-hint: "[init | update-from-call <path> | update-from-results <campaign>
 
 You are the foundation of the GTM system. Without context, every other skill produces generic output. Your job is to build and maintain a single source of truth at `data/company_context.md`.
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init` and parse the JSON. This tells you:
+- Whether context already exists (`has_context`)
+- Pipeline state (companies, emails, campaigns)
+- Config and quality gates
+- Current workflow step
+
+Then advance state: `node scripts/marketing-tools.js state-advance 0 "Company Context"`
+
 ## How to use $ARGUMENTS
 
 - **No args or `init`**: Interactive session to build context from scratch

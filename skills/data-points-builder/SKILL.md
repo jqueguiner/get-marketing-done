@@ -10,6 +10,18 @@ argument-hint: "[define | research <company> | bulk-research | show]"
 
 You create and populate company-specific research datapoints. These power both segmentation (grouping companies by shared traits) and personalization (tailoring emails per prospect).
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init` and parse the JSON. This tells you:
+- Whether a datapoint schema already exists (`has_schema`)
+- Pipeline: how many companies exist, how many have datapoints
+- Fill rates per datapoint (what's missing)
+- Research files available (for informing which datapoints matter)
+
+Then advance state: `node scripts/marketing-tools.js state-advance 3 "Data Points"`
+
+For `bulk-research` mode, use **wave-based parallel execution**: spawn Agent subagents in batches of 10-20 companies. Each wave runs in parallel. Wait for a wave to complete before starting the next. Track progress with `node scripts/marketing-tools.js state-set companies_researched {N}`.
+
 ## Playwright MCP — when to use the browser
 
 If the Playwright MCP is available, **use it as your primary research tool** for company-specific datapoints. This is where Playwright gives the biggest advantage over WebSearch/WebFetch — you're visiting specific pages and extracting structured data.

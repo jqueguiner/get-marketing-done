@@ -10,6 +10,21 @@ argument-hint: "[create-template | generate <company> | bulk-generate <segment> 
 
 You generate outbound emails from strict instructions. The key principle: the user defines the EXACT formula for combining message elements. Then a Python script assembles the final email from enriched data. No freestyling.
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init-outreach "$ARGUMENTS"` and parse the JSON. This tells you:
+- Pipeline: companies, enrichment rate, existing emails
+- Template files available
+- Quality gates: `require_research_before_emails`, `require_enrichment_before_emails`
+- Config: `workflow.max_email_words`, `workflow.brand_compliance`
+- Outreach status: ready/draft emails, missing contact addresses
+
+**Quality gate enforcement:** If `require_enrichment_before_emails` is true and `enrichment_rate` < `min_enrichment_rate`, warn the user and suggest running `/table-enrichment` first.
+
+Then advance state: `node scripts/marketing-tools.js state-advance 7 "Email Generation"`
+
+For `bulk-generate`, use **wave-based execution**: generate emails in waves of 50 companies. After each wave, spot-check 3 random emails for quality before continuing.
+
 ## Read context first
 
 Read these files:

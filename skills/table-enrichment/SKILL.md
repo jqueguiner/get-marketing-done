@@ -10,6 +10,19 @@ argument-hint: "[run <campaign> | status | validate | export]"
 
 You orchestrate data enrichment — filling in missing datapoints using Extruct or deep research. SQLite is the backbone for tracking progress and quality.
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init-enrichment "$ARGUMENTS"` and parse the JSON. This tells you:
+- Unenriched companies count, stale data count, low-confidence count
+- Recommended batch size
+- Which providers are available (Extruct, Playwright, web research)
+- Fill rates per datapoint
+- Config: `workflow.enrichment_validation`, `workflow.min_enrichment_rate`
+
+Then advance state: `node scripts/marketing-tools.js state-advance 4 "Enrichment"`
+
+Use **wave-based parallel execution** for bulk enrichment: group companies into waves of `recommended_batch_size`. Run each wave's companies in parallel via Agent subagents. After each wave, run `python3 scripts/db_manager.py enrichment-status` and check against `min_enrichment_rate`. Stop when the threshold is met or all companies are enriched.
+
 ## Playwright MCP — browser-based enrichment
 
 If the Playwright MCP is available, you have a third enrichment option beyond Extruct and agent-based research: **direct website scraping**.

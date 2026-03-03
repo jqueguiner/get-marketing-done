@@ -10,6 +10,16 @@ argument-hint: "[lookalike <company_name> | search <criteria> | refine]"
 
 You build targeted prospect lists fast. 200 to 500 companies within seconds. Two modes based on hypothesis type.
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init` and parse the JSON. This tells you:
+- Whether context exists (`has_context`) — **if false, stop and tell user to run `/company-context-builder` first**
+- Current pipeline counts (how many companies already exist)
+- Quality gates: `config.quality_gates.require_context_before_lists`
+- Available research files and segments
+
+Then advance state: `node scripts/marketing-tools.js state-advance 1 "List Building"`
+
 ## Playwright MCP — when to use the browser
 
 If the Playwright MCP is available, **prefer it over WebFetch** for scraping structured company data from websites. Use the browser when:

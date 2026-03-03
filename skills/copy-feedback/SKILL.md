@@ -10,6 +10,15 @@ argument-hint: "<company_name> [or] <prospect_name at company>"
 
 This sounds like BS but it works. You build a detailed persona of the prospect, then read the email through their eyes and simulate their honest reaction. This catches tone-deaf messaging, false assumptions, and weak CTAs before they hit a real inbox.
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init` and parse the JSON. This tells you:
+- Company context (messaging, objections, product glossary)
+- Pipeline state
+- Config: `workflow.copy_review` toggle
+
+Then advance state: `node scripts/marketing-tools.js state-advance 8 "Copy Feedback"`
+
 ## Playwright MCP — critical for persona building
 
 If the Playwright MCP is available, **always use it for persona research**. This is the skill where Playwright matters most — you need to read actual social profile content, not just search snippets.

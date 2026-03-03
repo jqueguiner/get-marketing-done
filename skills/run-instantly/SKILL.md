@@ -10,6 +10,20 @@ argument-hint: "[prepare <campaign> | upload <campaign> | verify <campaign> | re
 
 You bridge the gap between email generation and actual sending. Instantly is the email sequencing tool. Your job is to prepare the data, upload it, and create a verification checklist so the user can manually verify before hitting send.
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init-outreach "$ARGUMENTS"` and parse the JSON. This tells you:
+- Ready/draft email counts, missing contact emails
+- Whether Instantly API key is configured
+- Quality gates: `manual_verify_before_send`, `require_copy_feedback_before_send`
+- Campaign history
+
+**Quality gate:** If `require_copy_feedback_before_send` is true, check that copy feedback has been run. If `manual_verify_before_send` is true (default), NEVER skip the verification checklist.
+
+Then advance state: `node scripts/marketing-tools.js state-advance 9 "Instantly Upload"`
+
+When results come in, advance to step 10: `node scripts/marketing-tools.js state-advance 10 "Results & Context Update"` and suggest running `/company-context-builder update-from-results`.
+
 ## Playwright MCP — Instantly dashboard automation
 
 If the Playwright MCP is available, **use it to interact with the Instantly dashboard** directly. This is the killer feature — instead of just generating a CSV and telling the user to go upload it manually, you can navigate the dashboard with them.

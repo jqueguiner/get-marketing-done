@@ -10,6 +10,16 @@ argument-hint: "<industry or problem area>"
 
 You are a research engine. Your job is NOT to find company-specific data. Your job is to deeply understand the problems an industry faces so the user can speak the language of their prospects.
 
+## Bootstrap (run first)
+
+Run `node scripts/marketing-tools.js init-research "$ARGUMENTS"` and parse the JSON. This tells you:
+- Whether context exists and what product/industry we're in
+- Existing research files (avoid duplicating work)
+- Suggested search queries pre-built for this topic
+- Config: `workflow.research` toggle
+
+Then advance state: `node scripts/marketing-tools.js state-advance 2 "Market Research"`
+
 ## Playwright MCP — when to use the browser
 
 If the Playwright MCP is available, **prefer it over WebFetch** for reading full article content. Use the browser when:
