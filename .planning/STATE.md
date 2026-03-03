@@ -71,6 +71,7 @@ Recent decisions affecting current work:
 - [Discuss P3]: Claude parity locked to last tagged release baseline; hybrid strict/semantic checks; no user-visible behavior changes; block on any regression
 - [Plan P3]: Execution split into two waves: contract-parity refactor then tagged-baseline parity gate for progress/verify
 - [Execute P3]: Claude parity gate added (`verify_claude_parity.js`) and passing against baseline `v1.1.1`; ADPT-02 and CMD-03 closed
+- [Discuss P4]: Resume priority locked to continue-file > STATE > computed snapshot, with newest-artifact conflict rule and structured fallback warnings
 
 ### Roadmap Evolution
 
@@ -90,6 +91,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 3 complete and verified
-Resume file: .planning/phases/03-claude-adapter-parity-refactor/03-VERIFICATION.md
-Next: $gsd-discuss-phase 4
+Stopped at: Phase 4 discussion complete
+Resume file: .planning/phases/04-cross-adapter-state-continuity/04-CONTEXT.md
+Next: $gsd-plan-phase 4
