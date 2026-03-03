@@ -22,6 +22,11 @@ const SECTIONS = [
     requirements: ['CMD-01', 'QUAL-01']
   },
   {
+    id: 'command_flow_smoke',
+    script: 'verify_command_flow_smoke.js',
+    requirements: ['CMD-01', 'QUAL-01', 'QUAL-02']
+  },
+  {
     id: 'quality_gate_consistency',
     script: 'verify_quality_gate_consistency.js',
     requirements: ['CMD-01', 'QUAL-02']

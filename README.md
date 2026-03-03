@@ -146,6 +146,28 @@ Verification gate policy checks:
 - Prepare action is allowed after verification state preconditions are satisfied.
 - Any mismatch or bypass exits non-zero and should block merge/release.
 
+Adapter parity harness:
+
+```bash
+node scripts/verify_adapter_parity.js
+```
+
+Parity harness coverage:
+- Executes provider parity sections sequentially (fail-fast).
+- Aggregates requirement-tagged diagnostics for `CMD-01`, `QUAL-01`, `QUAL-02`.
+- Exits non-zero on the first failing section.
+
+Critical command-flow smoke suite:
+
+```bash
+node scripts/verify_command_flow_smoke.js
+```
+
+Smoke suite coverage:
+- Validates `init`, `progress`, `pause/resume`, and `send-prepare` across Claude + Codex.
+- Asserts strict state-driving fields plus semantic flow consistency.
+- Produces JSON check/failure output suitable for release gating.
+
 ### Core Workflow
 
 | Command | Arguments | Example |
