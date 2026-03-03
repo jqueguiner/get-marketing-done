@@ -14,3 +14,5 @@ __pycache__/
 *.pyc
 .claude/
 /tmp/
+node_modules/
+package-lock.json

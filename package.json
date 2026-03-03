@@ -1,0 +1,28 @@
+{
+  "name": "get-marketing-done",
+  "version": "1.0.0",
+  "description": "Full-cycle GTM automation for Claude Code — ICP definition, list building, enrichment, email generation, and campaign execution",
+  "bin": {
+    "get-marketing-done": "bin/install.js"
+  },
+  "files": [
+    "bin",
+    "skills",
+    "hooks",
+    "scripts",
+    "templates",
+    "config.example.json"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "claude-code",
+    "marketing",
+    "gtm",
+    "outbound",
+    "email",
+    "automation"
+  ],
+  "license": "MIT"
+}
