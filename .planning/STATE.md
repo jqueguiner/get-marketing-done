@@ -74,6 +74,7 @@ Recent decisions affecting current work:
 - [Discuss P4]: Resume priority locked to continue-file > STATE > computed snapshot, with newest-artifact conflict rule and structured fallback warnings
 - [Plan P4]: Execution split into runtime continuity contract (wave 1) then cross-adapter continuity scenario validation (wave 2)
 - [Execute P4]: Cross-adapter continuity validator added (`verify_cross_adapter_continuity.js`) and passing; CMD-02 and SAFE-03 closed
+- [Discuss P5]: Gate authority locked to shared runtime policy with config-backed quality gates and identical Claude/Codex enforcement behavior
 
 ### Roadmap Evolution
 
@@ -94,6 +95,6 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 4 complete and verified
-Resume file: .planning/phases/04-cross-adapter-state-continuity/04-VERIFICATION.md
-Next: $gsd-discuss-phase 5
+Stopped at: Phase 5 discussion complete
+Resume file: .planning/phases/05-verification-gate-consistency/05-CONTEXT.md
+Next: $gsd-plan-phase 5
