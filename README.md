@@ -194,6 +194,15 @@ All commands are prefixed with `marketing:` when used as a plugin. The full work
 | 9 | `/marketing:run-instantly` | Prepare CSV, upload to Instantly, verification checklist. Never auto-sends. |
 | 10 | `/marketing:company-context-builder` | Results feed back in. The compound loop closes. |
 
+### Session Management
+
+| Command | What It Does |
+|---------|--------------|
+| `/marketing:campaign-progress` | Visual pipeline dashboard — step markers, pipeline counts, next action routing. |
+| `/marketing:campaign-verify` | Goal-backward verification — checks exists/substantive/wired across the entire pipeline. |
+| `/marketing:pause-work` | Save campaign state to `.continue-here.md` for cross-session persistence. |
+| `/marketing:resume-work` | Restore state from a previous session and route to the next action. |
+
 ### Command Arguments
 
 | Command | Arguments | Example |
@@ -206,6 +215,10 @@ All commands are prefixed with `marketing:` when used as a plugin. The full work
 | `email-generation` | `create-template`, `generate <company>`, `bulk-generate <segment>`, `preview`, `iterate` | `/marketing:email-generation generate "Acme Corp"` |
 | `copy-feedback` | `<company>` or `<person at company>` | `/marketing:copy-feedback "Jane Smith at Acme Corp"` |
 | `run-instantly` | `prepare <campaign>`, `upload <campaign>`, `verify <campaign>`, `results <campaign>` | `/marketing:run-instantly prepare q1-fintech` |
+| `campaign-progress` | *(none)* | `/marketing:campaign-progress` |
+| `campaign-verify` | `<campaign_name>` | `/marketing:campaign-verify q1-fintech` |
+| `pause-work` | `[reason]` | `/marketing:pause-work "switching to another project"` |
+| `resume-work` | *(none)* | `/marketing:resume-work` |
 
 ---
 
@@ -252,14 +265,84 @@ data/
 
 ### Scripts
 
-Four Python scripts power the data layer. No pip dependencies — standard library only.
-
 | Script | Commands | Purpose |
 |--------|----------|---------|
+| `marketing-tools.js` | 17 CLI commands | **Single-call bootstrap** — returns all campaign context in one JSON blob |
 | `db_manager.py` | 20 CLI commands | All SQLite operations — companies, datapoints, emails, campaigns, segments |
 | `email_assembler.py` | `generate`, `bulk-generate`, `list-templates` | Template-based email assembly with forbidden word checking |
 | `enrichment_runner.py` | `run`, `status` | Enrichment orchestration with progress tracking |
 | `instantly_uploader.py` | `prepare`, `upload`, `results` | CSV generation, Instantly API upload, results fetching |
+
+No pip dependencies — Python standard library only. Node.js scripts also dependency-free.
+
+### State Management
+
+Campaigns persist across sessions. The system tracks where you are and what happened:
+
+- **`STATE.md`** — YAML frontmatter (machine-readable) + markdown body (human-readable). Tracks current step, campaign, pipeline counts, performance metrics, session log.
+- **`.continue-here.md`** — Checkpoint file written by `/pause-work`. Contains everything needed to resume: position, pipeline snapshot, what was happening, suggested next action.
+- **Session start hook** — Detects paused work when you open Claude Code and prompts to resume.
+
+```
+# Resume flow
+Session starts → hook detects STATE.md → shows "Campaign in progress"
+                                        → user runs /resume-work
+                                        → reads .continue-here.md
+                                        → routes to next action
+```
+
+### Context Window Monitoring
+
+Three-component system adapted from GSD — prevents losing work when context runs low:
+
+1. **Statusline hook** — Shows campaign step, writes bridge file to `/tmp/`
+2. **Context monitor hook** (PostToolUse) — Reads bridge file, injects warnings:
+   - **>35% remaining**: Normal, no warnings
+   - **<=35% remaining**: "Complete current task, avoid new complex work"
+   - **<=25% remaining**: "Save state NOW. Run `/marketing:pause-work`"
+3. **Debouncing** — Warnings every 5 tool uses; severity escalation bypasses debounce
+
+### Quality Gates
+
+Configurable gates that prevent skipping steps:
+
+```json
+{
+  "quality_gates": {
+    "require_context_before_lists": true,
+    "require_research_before_emails": true,
+    "require_enrichment_before_emails": true,
+    "require_copy_feedback_before_send": false,
+    "manual_verify_before_send": true
+  }
+}
+```
+
+Each skill checks its gates at startup via `marketing-tools.js init`. If a gate fails, the skill warns the user and suggests the prerequisite step.
+
+### Goal-Backward Verification
+
+`/campaign-verify` checks campaign readiness at three levels:
+
+| Level | What It Checks | Example |
+|-------|---------------|---------|
+| **Exists** | Do the artifacts exist? | Company context file, prospect list, research files |
+| **Substantive** | Is the content real? | ICP has >500 chars, list has 200+ companies, enrichment >50% |
+| **Wired** | Do pieces connect? | Emails linked to companies, contacts have email addresses |
+
+### Wave-Based Execution
+
+Bulk operations (research, enrichment, email generation) use parallel waves:
+
+```
+Wave 1: [Company A, Company B, Company C, ...]  ← 10-20 in parallel
+            ↓ all complete
+Wave 2: [Company K, Company L, Company M, ...]  ← next batch
+            ↓ all complete
+   ... until done or threshold met
+```
+
+Each wave runs companies in parallel via Agent subagents. After each wave, progress is checked against configured thresholds (`min_enrichment_rate`, `min_list_size`).
 
 ---
 
@@ -298,15 +381,16 @@ export PERPLEXITY_API_KEY="your-key-here"
 > [!TIP]
 > You can run the entire workflow with zero API keys. The system uses Claude Code's built-in WebSearch, WebFetch, and Playwright MCP for research, and generates CSVs you can import into any email tool.
 
-### Permissions
+### Permissions & Hooks
 
-The plugin ships with a `settings.json` that pre-approves common tool patterns:
+The plugin ships with a `settings.json` that pre-approves common tool patterns and registers hooks:
 
 ```json
 {
   "permissions": {
     "allow": [
       "Bash(python3 scripts/*)",
+      "Bash(node scripts/*)",
       "Bash(sqlite3 data/gtm.db *)",
       "Read", "Write", "Edit",
       "Glob", "Grep",
@@ -316,7 +400,15 @@ The plugin ships with a `settings.json` that pre-approves common tool patterns:
 }
 ```
 
-You'll still be prompted for Playwright browser actions and any commands outside this list.
+Three hooks are registered automatically:
+
+| Hook | Trigger | Purpose |
+|------|---------|---------|
+| `hooks/statusline.js` | Status line | Shows current GTM step and campaign in the status bar |
+| `hooks/context-monitor.js` | PostToolUse | Warns when context window is running low |
+| `hooks/session-start.js` | SessionStart | Detects paused campaigns and prompts to resume |
+
+You'll still be prompted for Playwright browser actions and any commands outside the allow list.
 
 ---
 
@@ -401,6 +493,20 @@ Here's what a real session looks like, start to finish:
 
 # 10. After the campaign runs, feed results back
 /marketing:company-context-builder update-from-results q1-fintech
+
+# --- Session management (use anytime) ---
+
+# Check pipeline progress
+/marketing:campaign-progress
+
+# Verify campaign readiness before sending
+/marketing:campaign-verify q1-fintech
+
+# Pause and pick up later (context window low, switching tasks, etc.)
+/marketing:pause-work "enrichment done, emails next"
+
+# Next session — resume right where you left off
+/marketing:resume-work
 ```
 
 ---
@@ -426,17 +532,34 @@ get-marketing-done/
 │   │   └── SKILL.md             ← Step 7: strict formula email assembly
 │   ├── copy-feedback/
 │   │   └── SKILL.md             ← Step 8: prospect persona simulation
-│   └── run-instantly/
-│       └── SKILL.md             ← Step 9: Instantly upload + verification
+│   ├── run-instantly/
+│   │   └── SKILL.md             ← Step 9: Instantly upload + verification
+│   ├── campaign-progress/
+│   │   └── SKILL.md             ← Visual pipeline dashboard
+│   ├── campaign-verify/
+│   │   └── SKILL.md             ← Goal-backward verification
+│   ├── pause-work/
+│   │   └── SKILL.md             ← Save state for cross-session persistence
+│   └── resume-work/
+│       └── SKILL.md             ← Restore state and route to next action
+├── hooks/
+│   ├── statusline.js            ← Writes bridge file, shows GTM step in status bar
+│   ├── context-monitor.js       ← PostToolUse: warns when context window runs low
+│   └── session-start.js         ← Detects paused campaigns, prompts to resume
 ├── scripts/
+│   ├── marketing-tools.js       ← Single-call bootstrap engine (17 commands)
 │   ├── db_manager.py            ← SQLite data layer (20 commands)
 │   ├── email_assembler.py       ← Template-based email generation
 │   ├── enrichment_runner.py     ← Enrichment orchestration
 │   └── instantly_uploader.py    ← Instantly CSV + API integration
 ├── data/                        ← Runtime data (gitignored)
-├── config.example.json          ← API key template
-├── config.json                  ← Your API keys (gitignored)
-├── settings.json                ← Permission pre-approvals
+│   ├── gtm.db                   ← SQLite database (companies, emails, campaigns)
+│   ├── company_context.md       ← Living context doc (ICP, glossary, learnings)
+│   ├── STATE.md                 ← Campaign state (YAML frontmatter + markdown)
+│   └── .continue-here.md        ← Pause checkpoint (written by /pause-work)
+├── config.example.json          ← API key template + workflow toggles
+├── config.json                  ← Your config (gitignored)
+├── settings.json                ← Permissions + hooks registration
 └── .gitignore
 ```
 
