@@ -2,5 +2,22 @@
   "extruct_api_key": "",
   "instantly_api_key": "",
   "perplexity_api_key": "",
-  "notes": "Copy this to config.json and fill in your API keys. Or set as environment variables: EXTRUCT_API_KEY, INSTANTLY_API_KEY, PERPLEXITY_API_KEY"
+  "model_profile": "balanced",
+  "workflow": {
+    "research": true,
+    "copy_review": true,
+    "enrichment_validation": true,
+    "brand_compliance": true,
+    "auto_advance": false,
+    "min_enrichment_rate": 50,
+    "min_list_size": 200,
+    "max_email_words": 100
+  },
+  "quality_gates": {
+    "require_context_before_lists": true,
+    "require_research_before_emails": true,
+    "require_enrichment_before_emails": true,
+    "require_copy_feedback_before_send": false,
+    "manual_verify_before_send": true
+  }
 }

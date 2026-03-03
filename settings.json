@@ -2,6 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(python3 scripts/*)",
+      "Bash(node scripts/*)",
       "Bash(sqlite3 data/gtm.db *)",
       "Read",
       "Write",
@@ -11,5 +12,30 @@
       "WebSearch",
       "WebFetch"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/context-monitor.js"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node hooks/session-start.js"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "command": "node hooks/statusline.js"
   }
 }
