@@ -54,24 +54,24 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ADPT-01 | Unmapped | Pending |
-| ADPT-02 | Unmapped | Pending |
-| ADPT-03 | Unmapped | Pending |
-| CMD-01 | Unmapped | Pending |
-| CMD-02 | Unmapped | Pending |
-| CMD-03 | Unmapped | Pending |
-| SAFE-01 | Unmapped | Pending |
-| SAFE-02 | Unmapped | Pending |
-| SAFE-03 | Unmapped | Pending |
-| QUAL-01 | Unmapped | Pending |
-| QUAL-02 | Unmapped | Pending |
-| DOC-01 | Unmapped | Pending |
+| ADPT-03 | Phase 1 | Pending |
+| SAFE-01 | Phase 1 | Pending |
+| ADPT-01 | Phase 2 | Pending |
+| ADPT-02 | Phase 3 | Pending |
+| CMD-03 | Phase 3 | Pending |
+| CMD-02 | Phase 4 | Pending |
+| SAFE-03 | Phase 4 | Pending |
+| SAFE-02 | Phase 5 | Pending |
+| CMD-01 | Phase 6 | Pending |
+| QUAL-01 | Phase 6 | Pending |
+| QUAL-02 | Phase 6 | Pending |
+| DOC-01 | Phase 8 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 after roadmap creation*
