@@ -1,6 +1,6 @@
 {
   "name": "get-marketing-done",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Full-cycle GTM automation for Claude Code — ICP definition, list building, enrichment, email generation, and campaign execution",
   "bin": {
     "get-marketing-done": "bin/install.js"

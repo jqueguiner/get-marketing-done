@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.6
+
+- Maintenance release
+
+
 ## 1.1.5
 
 - Maintenance release
