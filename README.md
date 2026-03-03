@@ -122,6 +122,18 @@ Parity policy:
 - Non-critical structures are checked semantically.
 - Any regression fails the validator and blocks phase completion.
 
+Cross-adapter continuity gate:
+
+```bash
+node scripts/verify_cross_adapter_continuity.js
+```
+
+Continuity policy checks:
+- Pause in one provider resumes correctly in the other (Claude <-> Codex).
+- Resume source selection follows precedence + timestamp arbitration.
+- Invalid top resume source falls back with structured warnings.
+- State schema remains backward-compatible with additive provenance metadata.
+
 ### Core Workflow
 
 | Command | Arguments | Example |
