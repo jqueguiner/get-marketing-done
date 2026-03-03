@@ -12,7 +12,7 @@ This milestone adapts the existing Claude-first GTM automation system into an as
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Canonical Contracts** - Define canonical workflow actions, adapter interfaces, and provider capability matrix
+- [x] **Phase 1: Canonical Contracts** - Define canonical workflow actions, adapter interfaces, and provider capability matrix (completed 2026-03-03)
 - [ ] **Phase 2: Codex Adapter Foundation** - Implement Codex-oriented adapter wiring for canonical actions
 - [ ] **Phase 3: Claude Adapter Parity Refactor** - Refactor existing Claude integration onto shared adapter interface without regressions
 - [ ] **Phase 4: Cross-Adapter State Continuity** - Ensure pause/resume/progress behavior and persisted state compatibility across adapters
@@ -31,11 +31,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Canonical workflow action schema is documented and referenced by all adapters
   2. Provider capability matrix defines supported tools, hook semantics, and constraints per assistant
   3. Core workflow logic no longer requires assistant-specific branches for action dispatch
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 01-01-PLAN.md -- Define action contracts, adapter interface, and capability matrix artifacts
-- [ ] 01-02-PLAN.md -- Refactor core orchestration entry points to consume canonical actions
+- [x] 01-01-PLAN.md -- Define action contracts, adapter interface, and capability matrix artifacts
+- [x] 01-02-PLAN.md -- Refactor core orchestration entry points to consume canonical actions
 
 ### Phase 2: Codex Adapter Foundation
 **Goal**: Ship Codex-compatible command routing and workflow invocation over canonical actions
@@ -142,7 +142,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Canonical Contracts | 0/2 | Not started | — |
+| 1. Canonical Contracts | 2/2 | Complete   | 2026-03-03 |
 | 2. Codex Adapter Foundation | 0/2 | Not started | — |
 | 3. Claude Adapter Parity Refactor | 0/2 | Not started | — |
 | 4. Cross-Adapter State Continuity | 0/2 | Not started | — |

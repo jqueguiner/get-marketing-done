@@ -9,7 +9,7 @@
 
 - [ ] **ADPT-01**: Operator can run the same canonical workflow actions through a Codex-compatible command adapter.
 - [ ] **ADPT-02**: Operator can run existing Claude workflow commands without behavioral regression after adapter refactor.
-- [ ] **ADPT-03**: Maintainer can define assistant capability metadata in one support matrix used by adapters.
+- [x] **ADPT-03**: Maintainer can define assistant capability metadata in one support matrix used by adapters.
 
 ### Command and Workflow Parity
 
@@ -19,7 +19,7 @@
 
 ### Integration and State Safety
 
-- [ ] **SAFE-01**: Maintainer can keep provider-specific auth/config isolated from core workflow logic.
+- [x] **SAFE-01**: Maintainer can keep provider-specific auth/config isolated from core workflow logic.
 - [ ] **SAFE-02**: Operator can execute manual verification gates before send actions in every supported adapter.
 - [ ] **SAFE-03**: System can preserve existing SQLite/CSV/Markdown schemas during adaptation.
 
@@ -54,8 +54,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ADPT-03 | Phase 1 | Pending |
-| SAFE-01 | Phase 1 | Pending |
+| ADPT-03 | Phase 1 | Complete |
+| SAFE-01 | Phase 1 | Complete |
 | ADPT-01 | Phase 2 | Pending |
 | ADPT-02 | Phase 3 | Pending |
 | CMD-03 | Phase 3 | Pending |
@@ -74,4 +74,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after roadmap creation*
+*Last updated: 2026-03-03 after Phase 1 execution*

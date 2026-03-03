@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: in_progress
+last_updated: "2026-03-03T17:40:00Z"
+progress:
+  total_phases: 8
+  completed_phases: 1
+  total_plans: 16
+  completed_plans: 2
+---
+
 # Project State
 
 ## Project Reference
@@ -5,29 +18,29 @@
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Teams can run repeatable outbound campaigns with cumulative context and quality gates, regardless of which supported coding assistant they use
-**Current focus:** Phase 1 - Canonical Contracts
+**Current focus:** Phase 2 - Codex Adapter Foundation
 
 ## Current Position
 
-Phase: 1 of 8 (Canonical Contracts)
+Phase: 2 of 8 (Codex Adapter Foundation)
 Plan: 0 of 2 in current phase
-Status: Roadmap created -- ready for phase planning
-Last activity: 2026-03-03 -- Phase 1 context gathered (command naming decisions captured)
+Status: Phase 1 executed and verified -- ready for Phase 2 planning
+Last activity: 2026-03-03 -- Phase 1 complete (2/2 plans, verification passed)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 12%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: N/A
-- Total execution time: N/A
+- Total plans completed: 2
+- Average duration: ~15min
+- Total execution time: ~0.5 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-canonical-contracts | 0/2 | — | — |
+| 01-canonical-contracts | 2/2 | ~30min | ~15min |
 | 02-codex-adapter-foundation | 0/2 | — | — |
 | 03-claude-adapter-parity-refactor | 0/2 | — | — |
 | 04-cross-adapter-state-continuity | 0/2 | — | — |
@@ -49,10 +62,14 @@ Recent decisions affecting current work:
 - [Init]: Include cross-assistant support in active scope (Codex first, additional adapters incremental)
 - [Roadmap]: Sequence contract-first then Codex implementation before parity/test hardening
 - [Discuss P1]: Keep provider-native commands plus opt-in canonical aliases (`gmd:<action>`), with native precedence on conflicts
+- [Execute P1]: Canonical payload normalization strips secret-like metadata keys (`token`, `api_key`, `access_token`, `secret`)
+- [Execute P1]: Capability matrix policy standardized as `native_wins_alias_warns`
+- [Execute P1]: Ingress routing now attempts native/canonical translation before unknown-command hard fail
 
 ### Roadmap Evolution
 
 - Phase 1-8 roadmap added: multi-assistant adaptation milestone with Codex-first execution order
+- Phase 1 marked complete on 2026-03-03 (2/2 plans executed)
 
 ### Pending Todos
 
@@ -60,11 +77,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Adapter parity and state continuity carry regression risk; parity checks are required before broad adapter rollout.
+- Phase 2 needs deeper codex command coverage and validation over real end-to-end stage flows.
 
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-canonical-contracts/01-CONTEXT.md
-Next: $gsd-plan-phase 1
+Stopped at: Phase 1 complete and verified
+Resume file: .planning/phases/01-canonical-contracts/01-VERIFICATION.md
+Next: $gsd-discuss-phase 2
