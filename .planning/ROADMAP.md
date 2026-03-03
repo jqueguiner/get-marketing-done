@@ -45,7 +45,7 @@ Plans:
   1. A Codex adapter maps command invocations to canonical workflow actions
   2. Core GTM stage commands execute end-to-end through the Codex adapter
   3. Adapter-specific behavior is isolated to adapter layer files
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
 - [ ] 02-01-PLAN.md -- Implement Codex adapter command parser and action translator
