@@ -1,250 +1,137 @@
 # Get Marketing Done — Tutorial
 
-A full-cycle GTM automation framework for Claude Code. Build company context, research markets, build prospect lists, enrich data, generate personalized emails, and send campaigns — all from your terminal.
-
-## Installation
+## Install
 
 ```bash
 npx get-marketing-done
 ```
 
-Choose **Global** (recommended) to make commands available in every project, or **Local** for the current project only.
-
-After install, all commands appear as `/gmd:*` in Claude Code.
-
-## Configure API Keys (Optional)
-
-Edit `~/.claude/get-marketing-done/config.json`:
-
-```json
-{
-  "extruct_api_key": "",       // For automated enrichment
-  "instantly_api_key": "",     // For email sending via Instantly
-  "perplexity_api_key": ""     // For deep research
-}
-```
-
-None are required to start. The framework uses web search and Playwright browser automation as fallbacks.
-
-## The GTM Pipeline
-
-The framework follows a 10-step pipeline. Each step builds on the last. You don't have to run them in strict order, but the quality gates will tell you if you're skipping something important.
-
-```
-Step 0   Context        Define your company, ICP, product, and wins
-Step 1   Lists          Build a prospect list of 200-500 companies
-Step 2   Research       Deep-dive the market problems your prospects face
-Step 3   Datapoints     Define what to research about each company
-Step 4   Enrichment     Fill in those datapoints (automated + manual)
-Step 7   Emails         Generate personalized emails from templates
-Step 8   Feedback       Simulate prospect reactions and refine
-Step 9   Send           Upload to Instantly and verify before sending
-Step 10  Learn          Pull results and feed learnings back into context
-```
-
-## Step-by-Step Walkthrough
-
-### Step 0 — Build Company Context
-
-```
-/gmd:company-context-builder init
-```
-
-This is where everything starts. The skill walks you through 10 questions about your company: what you do, who you sell to, your wins, objections, and messaging. It writes everything to a `company_context.md` file that every other skill reads.
-
-**Do this first.** Nothing else works well without it.
-
-Other modes:
-- `/gmd:company-context-builder show` — display current context
-- `/gmd:company-context-builder update-from-call <path>` — ingest a sales call transcript
-- `/gmd:company-context-builder update-from-results <campaign>` — learn from campaign results
-
-### Step 1 — Build Your Prospect List
-
-```
-/gmd:list-building search <criteria>
-/gmd:list-building lookalike <company_name>
-```
-
-Two approaches:
-- **Search**: describe your target (e.g., "Series A SaaS companies in fintech, 50-200 employees")
-- **Lookalike**: name a company you've already won and find similar ones
-
-The skill uses web search and Playwright to find companies matching your ICP, then stores them in SQLite. Aim for 200-500 companies.
-
-After enrichment, you can refine:
-```
-/gmd:list-building refine
-```
-
-### Step 2 — Research Market Problems
-
-```
-/gmd:market-problems-deep-research <industry or problem area>
-```
-
-This is not company-specific research. It's about understanding the *landscape* — what problems exist in your target market, what industry leaders are saying, what trends matter.
-
-The output becomes the foundation for your email messaging angles. The skill searches conferences, analyst reports, surveys, and expert opinions, then writes structured research files.
-
-### Step 3 — Define Datapoints
-
-```
-/gmd:data-points-builder define
-```
-
-Decide what you want to know about each prospect company. Examples:
-- Recent funding round
-- Hiring signals (open engineering roles)
-- Tech stack
-- CEO podcast appearances
-- Recent product launches
-
-The skill helps you define a schema, then you can research companies one at a time or in bulk:
-
-```
-/gmd:data-points-builder research <company>
-/gmd:data-points-builder bulk-research
-```
-
-### Step 4 — Enrich Your List
-
-```
-/gmd:table-enrichment run <campaign>
-```
-
-This is the heavy lifting. The skill populates your datapoints across all companies using:
-- **Extruct API** (if configured) — automated enrichment
-- **Playwright** — browser-based scraping
-- **Web research** — search-based data collection
-
-Track progress and validate quality:
-```
-/gmd:table-enrichment status
-/gmd:table-enrichment validate
-```
-
-The framework enforces a minimum enrichment rate (default 50%) before you can generate emails. This prevents sending generic outreach.
-
-### Step 7 — Generate Emails
-
-```
-/gmd:email-generation create-template
-```
-
-First, define your email formula. The skill walks you through:
-1. Subject line formula
-2. Opening line (referencing a specific datapoint)
-3. Problem statement (from your research)
-4. Bridge to your solution
-5. CTA
-6. Tone and length constraints
-
-Then generate:
-```
-/gmd:email-generation generate <company>         # one at a time
-/gmd:email-generation bulk-generate <segment>     # all at once
-/gmd:email-generation iterate                     # refine and A/B test
-```
-
-Every email must reference at least one company-specific datapoint. No generic outreach gets through.
-
-### Step 8 — Get Copy Feedback
-
-```
-/gmd:copy-feedback <company_name>
-```
-
-Before sending, simulate how your prospect would react. The skill:
-1. Deep-dives the prospect's LinkedIn, social profiles, and industry context
-2. Builds a detailed persona
-3. Reads your email through their eyes
-4. Gives you honest feedback: what would make them reply, what would make them delete
-
-Refine your emails based on the simulation, then re-generate.
-
-### Step 9 — Send via Instantly
-
-```
-/gmd:run-instantly prepare <campaign>
-/gmd:run-instantly upload <campaign>
-/gmd:run-instantly verify <campaign>
-```
-
-Three phases, all mandatory:
-1. **Prepare**: validates every email has a valid address, no broken merge fields, no forbidden words. Generates the upload CSV.
-2. **Upload**: pushes to Instantly via API or Playwright dashboard automation.
-3. **Verify**: presents a checklist you must manually confirm before sending. The framework will **never** auto-send.
-
-### Step 10 — Learn From Results
-
-```
-/gmd:run-instantly results <campaign>
-/gmd:company-context-builder update-from-results <campaign>
-```
-
-After your campaign runs, pull results (open rates, reply rates, reply classification) and feed them back into your company context. This closes the loop — every campaign makes the next one better.
-
-## Supporting Commands
-
-These work at any point in the pipeline:
-
-### Check Progress
+Choose **Global** (recommended) or **Local** (current project only). Verify with:
 
 ```
 /gmd:campaign-progress
 ```
 
-Visual pipeline status: which steps are complete, what's next, company counts, enrichment rates.
+No API keys required to start.
 
-### Verify Campaign Readiness
+## The Workflow
 
-```
-/gmd:campaign-verify <campaign_name>
-```
+Run these in order. Each step builds on the last.
 
-Three-level verification:
-- **Exists**: do the artifacts exist? (context file, database, list, research, emails)
-- **Substantive**: is the content real? (ICP defined with detail, win cases documented, glossary populated)
-- **Wired**: are the pieces connected? (emails linked to companies, contacts have addresses)
-
-Run this before uploading to Instantly.
-
-### Pause and Resume
+### 1. Build Company Context
 
 ```
-/gmd:pause-work <reason>
-/gmd:resume-work
+/gmd:company-context-builder init
 ```
 
-Save your exact position in the pipeline so you can pick up in a new session. The framework captures your current step, pipeline metrics, and what you were doing.
+Walks you through 10 questions about your company — ICP, product, wins, objections. Creates a `company_context.md` that every other command reads.
 
-A session-start hook automatically detects paused work and reminds you to resume.
+**Do this first.** Nothing works well without it.
 
-## Quality Gates
+### 2. Build Your Prospect List
 
-The framework enforces quality gates to prevent sending bad outreach. These are configurable in `config.json`:
+```
+/gmd:list-building search "Series A SaaS companies in fintech, 50-200 employees"
+/gmd:list-building lookalike "Acme Corp"
+```
 
-| Gate | Default | What It Does |
-|------|---------|--------------|
-| `require_context_before_lists` | true | Can't build lists without company context |
-| `require_research_before_emails` | true | Can't generate emails without market research |
-| `require_enrichment_before_emails` | true | Can't generate emails below enrichment threshold |
-| `require_copy_feedback_before_send` | false | Must run copy feedback before uploading |
-| `manual_verify_before_send` | true | Must manually verify checklist before sending |
+Search by criteria or find companies similar to one you've already won. Aim for 200-500 companies.
 
-Minimum thresholds:
-- `min_enrichment_rate`: 50% (companies must have datapoints filled)
-- `min_list_size`: 200 (minimum prospect list size)
-- `max_email_words`: 100 (keeps emails short and sharp)
+### 3. Research Market Problems
 
-## Tips
+```
+/gmd:market-problems-deep-research "data pipeline reliability in fintech"
+```
 
-- **Start with `/gmd:company-context-builder init`**. Everything downstream depends on good context.
-- **Run `/gmd:campaign-progress`** whenever you're unsure what to do next. It routes you to the right step.
-- **Don't skip enrichment.** Generic emails with no company-specific references get ignored. The enrichment step is what makes your outreach personal.
-- **Use `/gmd:copy-feedback`** on at least 3-5 prospects before bulk sending. It catches messaging issues you won't see yourself.
-- **The context compounds.** After each campaign, run `update-from-results` to feed learnings back. Your second campaign will be significantly better than your first.
+Not company-specific — this is about understanding the landscape. What problems exist, what leaders are saying, what trends matter. This shapes your email messaging.
+
+### 4. Define Datapoints
+
+```
+/gmd:data-points-builder define
+```
+
+What do you want to know about each company? Funding round, hiring signals, tech stack, CEO podcast appearances, recent launches. Define the schema, then research in bulk:
+
+```
+/gmd:data-points-builder bulk-research
+```
+
+### 5. Enrich Your List
+
+```
+/gmd:table-enrichment run my-campaign
+/gmd:table-enrichment status
+```
+
+Fills in your datapoints across all companies using Extruct API, Playwright scraping, or web research. You need 50%+ enrichment rate before you can generate emails.
+
+### 6. Generate Emails
+
+```
+/gmd:email-generation create-template
+/gmd:email-generation bulk-generate fintech-segment
+```
+
+Define your exact email formula — subject line, opening line, problem statement, bridge, CTA. Every email must reference at least one company-specific datapoint.
+
+### 7. Get Copy Feedback
+
+```
+/gmd:copy-feedback "Jane Smith at FinCo"
+```
+
+Simulates how a prospect would react. Builds a persona from their social profiles, reads your email through their eyes, gives honest feedback. Run on 3-5 prospects before bulk sending.
+
+### 8. Send via Instantly
+
+```
+/gmd:run-instantly prepare my-campaign
+/gmd:run-instantly upload my-campaign
+/gmd:run-instantly verify my-campaign
+```
+
+Prepare validates everything. Upload pushes to Instantly. Verify is a mandatory checklist before sending. The system **never** auto-sends.
+
+### 9. Learn From Results
+
+```
+/gmd:run-instantly results my-campaign
+/gmd:company-context-builder update-from-results my-campaign
+```
+
+Pull results and feed them back into your context. Every campaign makes the next one better.
+
+## Session Management
+
+```
+/gmd:campaign-progress          # What's done, what's next
+/gmd:campaign-verify my-campaign # Is it ready to send?
+/gmd:pause-work "switching tasks" # Save state
+/gmd:resume-work                 # Pick up where you left off
+```
+
+A session-start hook detects paused work and reminds you to resume.
+
+## API Keys (Optional)
+
+Edit `~/.claude/get-marketing-done/config.json`:
+
+```json
+{
+  "extruct_api_key": "",
+  "instantly_api_key": "",
+  "perplexity_api_key": ""
+}
+```
+
+None required. The system falls back to web search and Playwright.
+
+## Update
+
+```bash
+npx get-marketing-done
+```
 
 ## Uninstall
 
@@ -252,4 +139,4 @@ Minimum thresholds:
 npx get-marketing-done --uninstall --global
 ```
 
-This removes all installed files but preserves your `data/` directory (campaign data, context, database).
+Your campaign data is preserved.
