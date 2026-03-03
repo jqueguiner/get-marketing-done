@@ -12,6 +12,18 @@ function isCodexNativeCommand(command) {
   return typeof command === 'string' && command.startsWith('$gmd-');
 }
 
+function isClaudeNativeCommand(command) {
+  return typeof command === 'string' && command.startsWith('/gmd:');
+}
+
+function isNativeForProvider(provider, command) {
+  const capabilities = getProviderCapabilities(provider);
+  if (!capabilities || !Array.isArray(capabilities.native_command_prefixes)) return false;
+  return capabilities.native_command_prefixes.some((prefix) => (
+    typeof command === 'string' && command.startsWith(prefix)
+  ));
+}
+
 function parseAlias(command) {
   if (typeof command !== 'string' || !command.startsWith('gmd:')) return null;
   const candidate = command.slice('gmd:'.length).trim();
@@ -26,10 +38,15 @@ function listSupportedCommands(provider) {
 
 function getProviderDiagnostics(provider) {
   const commands = listSupportedCommands(provider);
+  const strictNativeCheck = {
+    claude: isClaudeNativeCommand,
+    codex: isCodexNativeCommand
+  };
+  const checkFn = strictNativeCheck[provider];
   return {
     provider: provider,
     command_count: commands.length,
-    strict_native: provider === 'codex' ? commands.every(isCodexNativeCommand) : false,
+    strict_native: checkFn ? commands.every(checkFn) : false,
     native_commands: commands
   };
 }
@@ -54,7 +71,7 @@ function routeCommand(input) {
     sourceKind = 'native';
   }
 
-  if (provider === 'codex' && isCodexNativeCommand(command) && !action) {
+  if (provider === 'codex' && isNativeForProvider(provider, command) && !action) {
     const err = new Error(`Unknown codex native command: ${command}`);
     err.code = 'UNKNOWN_CODEX_COMMAND';
     err.provider = provider;
@@ -97,6 +114,7 @@ function routeCommand(input) {
 }
 
 module.exports = {
+  isClaudeNativeCommand,
   isCodexNativeCommand,
   getProviderDiagnostics,
   routeCommand,

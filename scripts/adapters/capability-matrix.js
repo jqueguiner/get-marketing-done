@@ -16,7 +16,7 @@ const CAPABILITY_MATRIX = Object.freeze({
     conflict_policy: 'native_wins_alias_warns'
   }),
   codex: Object.freeze({
-    native_command_prefixes: ['$gmd-', 'gmd:'],
+    native_command_prefixes: ['$gmd-'],
     supports: Object.freeze({
       inline_options: true,
       hooks: false,
