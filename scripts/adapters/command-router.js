@@ -8,6 +8,10 @@ const PROVIDERS = Object.freeze({
   codex: codexProvider
 });
 
+function isCodexNativeCommand(command) {
+  return typeof command === 'string' && command.startsWith('$gmd-');
+}
+
 function parseAlias(command) {
   if (typeof command !== 'string' || !command.startsWith('gmd:')) return null;
   const candidate = command.slice('gmd:'.length).trim();
@@ -38,6 +42,14 @@ function routeCommand(input) {
   if (providerMap && Object.prototype.hasOwnProperty.call(providerMap, command)) {
     action = providerMap[command];
     sourceKind = 'native';
+  }
+
+  if (provider === 'codex' && isCodexNativeCommand(command) && !action) {
+    const err = new Error(`Unknown codex native command: ${command}`);
+    err.code = 'UNKNOWN_CODEX_COMMAND';
+    err.provider = provider;
+    err.command = command;
+    throw err;
   }
 
   const aliasPolicy = getAliasPolicy(provider);
@@ -75,6 +87,7 @@ function routeCommand(input) {
 }
 
 module.exports = {
+  isCodexNativeCommand,
   routeCommand,
   listSupportedCommands
 };
