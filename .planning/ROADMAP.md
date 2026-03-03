@@ -104,8 +104,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 06-01-PLAN.md -- Build adapter parity test runner and fixtures
-- [ ] 06-02-PLAN.md -- Add command-flow smoke suite for critical workflows
+- [x] 06-01-PLAN.md -- Build adapter parity test runner and fixtures
+- [x] 06-02-PLAN.md -- Add command-flow smoke suite for critical workflows
 
 ### Phase 7: Additional Adapter Scaffolds
 **Goal**: Provide contract-compliant scaffolds for Gemini/OpenCode/Mistral-style adapters
@@ -147,6 +147,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Claude Adapter Parity Refactor | 2/2 | Complete   | 2026-03-03 |
 | 4. Cross-Adapter State Continuity | 2/2 | Complete   | 2026-03-03 |
 | 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
-| 6. Parity Test Harness | 2/2 | Complete   | 2026-03-03 |
+| 6. Parity Test Harness | 2/2 | Complete    | 2026-03-03 |
 | 7. Additional Adapter Scaffolds | 0/2 | Not started | — |
 | 8. Docs and Migration Guide | 0/2 | Not started | — |

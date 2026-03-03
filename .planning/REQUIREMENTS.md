@@ -13,7 +13,7 @@
 
 ### Command and Workflow Parity
 
-- [ ] **CMD-01**: Operator can invoke core GTM pipeline steps with consistent state transitions across supported adapters.
+- [x] **CMD-01**: Operator can invoke core GTM pipeline steps with consistent state transitions across supported adapters.
 - [x] **CMD-02**: Operator can resume paused work from persisted state even when switching assistant frontends.
 - [x] **CMD-03**: Operator can run campaign progress/verification commands with equivalent outputs across adapters.
 
@@ -25,8 +25,8 @@
 
 ### Quality and Compatibility Validation
 
-- [ ] **QUAL-01**: Maintainer can run parity checks that detect command-output/state mismatches between adapters.
-- [ ] **QUAL-02**: Maintainer can validate key flows (init, progress, pause/resume, send-prepare) in Codex + Claude adapters.
+- [x] **QUAL-01**: Maintainer can run parity checks that detect command-output/state mismatches between adapters.
+- [x] **QUAL-02**: Maintainer can validate key flows (init, progress, pause/resume, send-prepare) in Codex + Claude adapters.
 - [ ] **DOC-01**: Operator can follow updated docs that explain assistant compatibility, setup differences, and supported commands.
 
 ## v2 Requirements
@@ -62,9 +62,9 @@
 | CMD-02 | Phase 4 | Complete |
 | SAFE-03 | Phase 4 | Complete |
 | SAFE-02 | Phase 5 | Complete |
-| CMD-01 | Phase 6 | Pending |
-| QUAL-01 | Phase 6 | Pending |
-| QUAL-02 | Phase 6 | Pending |
+| CMD-01 | Phase 6 | Complete |
+| QUAL-01 | Phase 6 | Complete |
+| QUAL-02 | Phase 6 | Complete |
 | DOC-01 | Phase 8 | Pending |
 
 **Coverage:**
@@ -74,4 +74,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after Phase 5 execution*
+*Last updated: 2026-03-03 after Phase 6 execution*
