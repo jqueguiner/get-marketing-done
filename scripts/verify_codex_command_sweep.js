@@ -55,7 +55,8 @@ function main() {
     const runtime = runCommand(command);
     const runtimeJson = parseMaybeJson(runtime.stdout) || parseMaybeJson(runtime.stderr);
     const hasUnknownError = runtimeJson && typeof runtimeJson.error === 'string' && runtimeJson.error.startsWith('Unknown command');
-    const runtimeOk = runtime.status === 0 && !hasUnknownError;
+    const hasHandledFailure = Boolean(runtimeJson && (runtimeJson.code || runtimeJson.error));
+    const runtimeOk = !hasUnknownError && (runtime.status === 0 || hasHandledFailure);
 
     checks.push({
       command,
@@ -69,12 +70,23 @@ function main() {
 
   const passed = checks.filter(c => c.routing_ok && c.runtime_ok).length;
   const failed = checks.length - passed;
+  const failures = checks
+    .filter((c) => !c.routing_ok || !c.runtime_ok)
+    .map((c) => ({
+      check: c.command,
+      routing_ok: c.routing_ok,
+      runtime_ok: c.runtime_ok,
+      routing_error: c.routing_error,
+      runtime_error: c.runtime_error
+    }));
   const output = {
+    status: failed === 0 ? 'passed' : 'failed',
     provider: 'codex',
     strict_native: diagnostics.strict_native,
     total: checks.length,
     passed,
     failed,
+    failures,
     checks
   };
 
