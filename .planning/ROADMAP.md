@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Cross-Adapter State Continuity** - Ensure pause/resume/progress behavior and persisted state compatibility across adapters (completed 2026-03-03)
 - [x] **Phase 5: Verification Gate Consistency** - Enforce manual verification and safety gates uniformly for every adapter (completed 2026-03-03)
 - [x] **Phase 6: Parity Test Harness** - Add compatibility checks for key command/state/output paths (completed 2026-03-03)
-- [ ] **Phase 7: Additional Adapter Scaffolds** - Add Gemini/OpenCode/Mistral-compatible scaffolds against shared contracts
+- [x] **Phase 7: Additional Adapter Scaffolds** - Add Gemini/OpenCode/Mistral-compatible scaffolds against shared contracts (completed 2026-03-03)
 - [ ] **Phase 8: Docs and Migration Guide** - Publish compatibility matrix, setup docs, and migration notes
 
 ## Phase Details
@@ -115,7 +115,7 @@ Plans:
   1. Scaffold packages for additional adapters compile and validate against contracts
   2. Capability gaps are documented explicitly per provider
   3. No core logic changes are required to add a new adapter scaffold
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 07-01-PLAN.md -- Add adapter scaffold templates and registration hooks
@@ -148,5 +148,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. Cross-Adapter State Continuity | 2/2 | Complete   | 2026-03-03 |
 | 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
 | 6. Parity Test Harness | 2/2 | Complete    | 2026-03-03 |
-| 7. Additional Adapter Scaffolds | 1/2 | In Progress|  |
+| 7. Additional Adapter Scaffolds | 2/2 | Complete   | 2026-03-03 |
 | 8. Docs and Migration Guide | 0/2 | Not started | — |
