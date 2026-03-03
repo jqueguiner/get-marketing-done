@@ -148,6 +148,37 @@ Configurable in `config.json`. Prevents sending bad outreach:
 
 ---
 
+## Releasing
+
+Two ways to publish a new version:
+
+### From the terminal
+
+```bash
+export GH_TOKEN=ghp_your_token
+gh workflow run release.yml -f bump=patch --repo jqueguiner/get-marketing-done
+```
+
+Replace `patch` with `minor` or `major` as needed.
+
+### By pushing a tag
+
+```bash
+npm version patch
+git push origin main --tags
+```
+
+Both paths automatically bump the version, generate a changelog, create a GitHub Release, and publish to npm.
+
+### Required secrets (GitHub repo settings)
+
+| Secret | Where to get it |
+|--------|----------------|
+| `NPM_TOKEN` | npmjs.com → Access Tokens → Granular Access Token (with 2FA bypass enabled) |
+| `GITHUB_TOKEN` | Automatic, no setup needed |
+
+---
+
 ## How It Works
 
 - **Context compounds** — nothing gets thrown away between campaigns
