@@ -5,7 +5,7 @@ const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 
-const SECTIONS = [
+const BASE_SECTIONS = [
   {
     id: 'codex_command_sweep',
     script: 'verify_codex_command_sweep.js',
@@ -32,6 +32,18 @@ const SECTIONS = [
     requirements: ['CMD-01', 'QUAL-02']
   }
 ];
+
+const SCAFFOLD_SECTION = {
+  id: 'scaffold_conformance',
+  script: 'verify_scaffold_conformance.js',
+  requirements: ['ADPT-04', 'ADPT-05', 'ADPT-06']
+};
+
+function parseArgs(argv) {
+  return {
+    includeScaffolds: argv.includes('--include-scaffolds')
+  };
+}
 
 function parseJson(text) {
   if (!text) return null;
@@ -113,12 +125,21 @@ function buildRequirementFailures(sectionSummary) {
 }
 
 function main() {
+  const args = parseArgs(process.argv.slice(2));
   const startedAt = new Date().toISOString();
+  const sectionsToRun = args.includeScaffolds ? BASE_SECTIONS.concat([SCAFFOLD_SECTION]) : BASE_SECTIONS;
+  const requirementSet = new Set(['CMD-01', 'QUAL-01', 'QUAL-02']);
+  if (args.includeScaffolds) {
+    requirementSet.add('ADPT-04');
+    requirementSet.add('ADPT-05');
+    requirementSet.add('ADPT-06');
+  }
+  const requirements = Array.from(requirementSet);
   const sections = [];
   const failures = [];
 
-  for (let i = 0; i < SECTIONS.length; i += 1) {
-    const spec = SECTIONS[i];
+  for (let i = 0; i < sectionsToRun.length; i += 1) {
+    const spec = sectionsToRun[i];
     const run = runSection(spec);
     const summary = summarizeSection(spec, run);
     sections.push(summary);
@@ -133,7 +154,7 @@ function main() {
         completed_at: new Date().toISOString(),
         fail_fast: true,
         failed_section: summary.section,
-        requirements: ['CMD-01', 'QUAL-01', 'QUAL-02'],
+        requirements,
         sections,
         failures
       };
@@ -148,7 +169,7 @@ function main() {
     started_at: startedAt,
     completed_at: new Date().toISOString(),
     fail_fast: true,
-    requirements: ['CMD-01', 'QUAL-01', 'QUAL-02'],
+    requirements,
     sections,
     failures: []
   };

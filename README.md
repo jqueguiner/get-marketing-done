@@ -168,6 +168,17 @@ Smoke suite coverage:
 - Asserts strict state-driving fields plus semantic flow consistency.
 - Produces JSON check/failure output suitable for release gating.
 
+Scaffold adapter conformance:
+
+```bash
+node scripts/verify_scaffold_conformance.js
+```
+
+Scaffold conformance coverage:
+- Validates Gemini/OpenCode/Mistral scaffold provider registration and minimal command routing.
+- Verifies inactive-by-default behavior returns structured diagnostics (`SCAFFOLD_PROVIDER_INACTIVE`).
+- Verifies unsupported scaffold native commands return structured capability-gap diagnostics (`SCAFFOLD_CAPABILITY_UNSUPPORTED`).
+
 ### Core Workflow
 
 | Command | Arguments | Example |
