@@ -817,6 +817,93 @@ function getCopyApprovalStatus(campaignName, currentHash) {
   };
 }
 
+function getHubspotCampaignRecord(campaignName) {
+  var raw = dbPassthrough('hubspot-campaign-get', ['--name', campaignName]);
+  if (!raw || raw.error) return null;
+  return raw;
+}
+
+function evaluateHubspotPreflight(campaignName) {
+  var checks = [];
+  var remediation = [];
+  var campaign = getHubspotCampaignRecord(campaignName);
+  var copyHash = computeCampaignCopyHash(campaignName);
+  var approval = getCopyApprovalStatus(campaignName, copyHash);
+  var safe = (campaignName || '').replace(/'/g, "''");
+  var emailRows = dbQuery(
+    "SELECT COUNT(*) as c FROM emails e JOIN campaigns cp ON e.campaign_id = cp.id WHERE cp.name = '" + safe + "'"
+  );
+  var emailCount = (emailRows && emailRows[0] && emailRows[0].c) ? Number(emailRows[0].c) : 0;
+
+  checks.push({
+    check: 'hubspot_campaign_shell_exists',
+    pass: Boolean(campaign),
+    severity: 'blocker',
+    detail: campaign ? 'campaign shell found' : 'create campaign shell first'
+  });
+
+  checks.push({
+    check: 'campaign_state_configured',
+    pass: Boolean(campaign && ['configured', 'preflight_ready', 'launched', 'completed'].indexOf(campaign.lifecycle_state) >= 0),
+    severity: 'blocker',
+    detail: campaign ? campaign.lifecycle_state : 'missing_campaign'
+  });
+
+  checks.push({
+    check: 'campaign_owner_set',
+    pass: Boolean(campaign && campaign.owner),
+    severity: 'blocker',
+    detail: campaign && campaign.owner ? campaign.owner : 'owner_missing'
+  });
+
+  checks.push({
+    check: 'campaign_segment_set',
+    pass: Boolean(campaign && campaign.audience_segment),
+    severity: 'blocker',
+    detail: campaign && campaign.audience_segment ? campaign.audience_segment : 'segment_missing'
+  });
+
+  checks.push({
+    check: 'generated_emails_exist',
+    pass: emailCount > 0,
+    severity: 'blocker',
+    detail: 'emails=' + emailCount
+  });
+
+  checks.push({
+    check: 'copy_approval_valid',
+    pass: approval.approved === true,
+    severity: 'blocker',
+    detail: approval.approved ? 'approved' : (approval.reason || 'approval_missing')
+  });
+
+  var failed = checks.filter(function(c) { return !c.pass && c.severity === 'blocker'; });
+  if (failed.length > 0) {
+    remediation.push('Create/update campaign shell: node scripts/marketing-tools.js hubspot-campaign create <campaign> --segment <segment> --owner <owner>');
+    remediation.push('Set lifecycle to configured: node scripts/marketing-tools.js hubspot-campaign set-state <campaign> configured');
+    remediation.push('Generate emails for campaign and re-run preflight.');
+    remediation.push('Approve copy: node scripts/marketing-tools.js hubspot-campaign approve <campaign> --by <reviewer>');
+    return {
+      campaign: campaignName,
+      status: 'blocked',
+      code: 'HUBSPOT_PREFLIGHT_BLOCKED',
+      checks: checks,
+      failed_checks: failed,
+      remediation: remediation
+    };
+  }
+
+  dbPassthrough('hubspot-campaign-update', ['--name', campaignName, '--state', 'preflight_ready']);
+  return {
+    campaign: campaignName,
+    status: 'passed',
+    code: 'HUBSPOT_PREFLIGHT_PASSED',
+    checks: checks,
+    failed_checks: [],
+    remediation: []
+  };
+}
+
 function hubspotCampaign(args) {
   var parts = Array.isArray(args) ? args.slice() : [];
   var mode = parts[0] || 'list';
@@ -877,21 +964,20 @@ function hubspotCampaign(args) {
     return status;
   }
 
+  if (mode === 'preflight') {
+    if (!name) return { error: 'Usage: hubspot-campaign preflight <campaign>' };
+    return evaluateHubspotPreflight(name);
+  }
+
   if (mode === 'launch') {
     if (!name) return { error: 'Usage: hubspot-campaign launch <campaign>' };
-    var launchHash = computeCampaignCopyHash(name);
-    var approval = getCopyApprovalStatus(name, launchHash);
-    if (!approval.approved) {
+    var preflight = evaluateHubspotPreflight(name);
+    if (preflight.status !== 'passed') {
       return {
-        error: 'Copy approval required before HubSpot launch.',
-        code: 'COPY_APPROVAL_REQUIRED',
+        error: 'HubSpot launch blocked by preflight policy.',
+        code: 'HUBSPOT_PREFLIGHT_BLOCKED',
         campaign: name,
-        reason: approval.reason,
-        remediation: [
-          'Generate/refresh campaign emails first if missing.',
-          'Run: node scripts/marketing-tools.js hubspot-campaign approve ' + name + ' --by <reviewer>',
-          'Re-run launch after approval-status is approved.'
-        ]
+        preflight: preflight
       };
     }
     return dbPassthrough('hubspot-campaign-update', ['--name', name, '--state', 'launched']);
@@ -908,6 +994,7 @@ function hubspotCampaign(args) {
       'hubspot-campaign update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>]',
       'hubspot-campaign approve <campaign> --by <reviewer> [--notes <text>]',
       'hubspot-campaign approval-status <campaign>',
+      'hubspot-campaign preflight <campaign>',
       'hubspot-campaign launch <campaign>'
     ]
   };
