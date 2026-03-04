@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Verification Gate Consistency** - Enforce manual verification and safety gates uniformly for every adapter (completed 2026-03-03)
 - [x] **Phase 6: Parity Test Harness** - Add compatibility checks for key command/state/output paths (completed 2026-03-03)
 - [x] **Phase 7: Additional Adapter Scaffolds** - Add Gemini/OpenCode/Mistral-compatible scaffolds against shared contracts (completed 2026-03-03)
-- [ ] **Phase 8: Docs and Migration Guide** - Publish compatibility matrix, setup docs, and migration notes
+- [x] **Phase 8: Docs and Migration Guide** - Publish compatibility matrix, setup docs, and migration notes (completed 2026-03-04)
 
 ## Phase Details
 
@@ -129,7 +129,7 @@ Plans:
   1. Docs explain supported adapters, command mappings, and setup differences
   2. Migration guide covers upgrade path from Claude-first installs
   3. Compatibility matrix states what is fully supported vs scaffold-only
-**Plans:** 0 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 08-01-PLAN.md -- Update README/tutorial with adapter model and usage
@@ -149,4 +149,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
 | 6. Parity Test Harness | 2/2 | Complete    | 2026-03-03 |
 | 7. Additional Adapter Scaffolds | 2/2 | Complete    | 2026-03-03 |
-| 8. Docs and Migration Guide | 0/2 | Not started | — |
+| 8. Docs and Migration Guide | 2/2 | Complete   | 2026-03-04 |

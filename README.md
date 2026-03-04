@@ -111,6 +111,8 @@ Provider appendix:
 - Claude-native examples: see Core Workflow + Session Management commands below.
 - Codex-native examples: use `$gmd-*` equivalents for the same actions (for example `$gmd-campaign-progress`, `$gmd-resume-work`).
 - Alias mode: enable adapter alias mode explicitly in config before using `gmd:<action>`.
+- Compatibility matrix: `docs/compatibility/assistant-support-matrix.md`
+- Migration path: `docs/migration/claude-first-to-multi-assistant.md`
 
 #### Error Contract Reference
 
