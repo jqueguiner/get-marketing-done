@@ -27,7 +27,7 @@
 
 - [x] **QUAL-01**: Maintainer can run parity checks that detect command-output/state mismatches between adapters.
 - [x] **QUAL-02**: Maintainer can validate key flows (init, progress, pause/resume, send-prepare) in Codex + Claude adapters.
-- [ ] **DOC-01**: Operator can follow updated docs that explain assistant compatibility, setup differences, and supported commands.
+- [x] **DOC-01**: Operator can follow updated docs that explain assistant compatibility, setup differences, and supported commands.
 
 ## v2 Requirements
 
@@ -68,7 +68,7 @@
 | ADPT-04 | Phase 7 | Complete |
 | ADPT-05 | Phase 7 | Complete |
 | ADPT-06 | Phase 7 | Complete |
-| DOC-01 | Phase 8 | Pending |
+| DOC-01 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 12 total
@@ -77,4 +77,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after Phase 7 execution*
+*Last updated: 2026-03-04 after Phase 8 execution*

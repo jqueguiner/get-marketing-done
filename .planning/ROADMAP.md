@@ -132,8 +132,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 08-01-PLAN.md -- Update README/tutorial with adapter model and usage
-- [ ] 08-02-PLAN.md -- Add migration and compatibility matrix documentation
+- [x] 08-01-PLAN.md -- Update README/tutorial with adapter model and usage
+- [x] 08-02-PLAN.md -- Add migration and compatibility matrix documentation
 
 ## Progress
 
@@ -149,4 +149,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 5. Verification Gate Consistency | 2/2 | Complete    | 2026-03-03 |
 | 6. Parity Test Harness | 2/2 | Complete    | 2026-03-03 |
 | 7. Additional Adapter Scaffolds | 2/2 | Complete    | 2026-03-03 |
-| 8. Docs and Migration Guide | 2/2 | Complete   | 2026-03-04 |
+| 8. Docs and Migration Guide | 2/2 | Complete    | 2026-03-04 |

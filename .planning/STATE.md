@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-last_updated: "2026-03-04T00:15:00Z"
+status: complete
+last_updated: "2026-03-04T00:55:00Z"
 progress:
   total_phases: 8
-  completed_phases: 7
+  completed_phases: 8
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 16
 ---
 
 # Project State
@@ -18,23 +18,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Teams can run repeatable outbound campaigns with cumulative context and quality gates, regardless of which supported coding assistant they use
-**Current focus:** Phase 8 - Docs and Migration Guide
+**Current focus:** Milestone closeout
 
 ## Current Position
 
 Phase: 8 of 8 (Docs and Migration Guide)
-Plan: 0 planned (0 executed) in current phase
-Status: Phase 7 complete -- ready for Phase 8 discussion/planning
-Last activity: 2026-03-03 -- Phase 7 execution complete (2/2 plans, scaffold conformance validated)
+Plan: 2 planned (2 executed) in current phase
+Status: Phase 8 complete -- milestone ready for audit/completion
+Last activity: 2026-03-04 -- Phase 8 execution complete (2/2 plans, docs + migration + compatibility matrix delivered)
 
-Progress: [█████████░] 88%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
+- Total plans completed: 16
 - Average duration: ~13min
-- Total execution time: ~2.6 hours
+- Total execution time: ~3.0 hours
 
 **By Phase:**
 
@@ -47,7 +47,7 @@ Progress: [█████████░] 88%
 | 05-verification-gate-consistency | 2/2 | ~22min | ~11min |
 | 06-parity-test-harness | 2/2 | ~20min | ~10min |
 | 07-additional-adapter-scaffolds | 2/2 | ~27min | ~13min |
-| 08-docs-and-migration-guide | 0/2 | — | — |
+| 08-docs-and-migration-guide | 2/2 | ~28min | ~14min |
 
 *Updated after each plan completion*
 
@@ -82,6 +82,8 @@ Recent decisions affecting current work:
 - [Discuss P7]: Scaffold providers locked to minimal command maps, hard-fail unknowns, config-gated activation, and structured capability-gap diagnostics
 - [Plan P7]: Execution split into scaffold registration/gating (wave 1) then scaffold conformance validation + readiness evidence (wave 2)
 - [Execute P7]: Gemini/OpenCode/Mistral scaffolds added with config gates and conformance validator (`verify_scaffold_conformance.js`); ADPT-04/05/06 readiness closed
+- [Discuss P8]: Docs strategy locked to task-first guidance + support-level matrix + Claude-first migration with opt-in Codex/alias
+- [Execute P8]: README/tutorial/docs updated with compatibility matrix, migration guide, runbook, and DOC-01 verification artifacts
 
 ### Roadmap Evolution
 
@@ -93,6 +95,7 @@ Recent decisions affecting current work:
 - Phase 5 marked complete on 2026-03-03 (2/2 plans executed)
 - Phase 6 marked complete on 2026-03-03 (2/2 plans executed)
 - Phase 7 marked complete on 2026-03-03 (2/2 plans executed)
+- Phase 8 marked complete on 2026-03-04 (2/2 plans executed)
 
 ### Pending Todos
 
@@ -104,7 +107,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-03
-Stopped at: Phase 7 execution complete
-Resume file: .planning/phases/07-additional-adapter-scaffolds/07-VERIFICATION.md
-Next: $gsd-discuss-phase 8
+Last session: 2026-03-04
+Stopped at: Phase 8 execution complete
+Resume file: .planning/phases/08-docs-and-migration-guide/08-VERIFICATION.md
+Next: $gsd-audit-milestone
