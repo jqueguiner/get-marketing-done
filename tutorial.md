@@ -14,6 +14,19 @@ Choose **Global** (recommended) or **Local** (current project only). Verify with
 
 No API keys required to start.
 
+## Command Styles (Claude + Codex)
+
+Use the command style that matches your assistant runtime:
+
+| Runtime | Command Style | Example |
+|---------|---------------|---------|
+| Claude | `/gmd:*` | `/gmd:campaign-progress` |
+| Codex | `$gmd-*` | `$gmd-campaign-progress` |
+
+Advanced mode:
+- Canonical alias `gmd:<action>` is optional and off by default.
+- Enable alias mode explicitly before using alias commands.
+
 ## The Workflow
 
 Run these in order. Each step builds on the last.

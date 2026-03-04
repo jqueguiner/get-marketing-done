@@ -93,17 +93,32 @@ Every step builds on the last. Results feed back to the beginning.
 
 ### Multi-Assistant Command Compatibility
 
-- Native assistant commands remain the primary interface.
-- Canonical aliases are available in adapter mode using `gmd:<action>`.
-- Alias mode is opt-in (disabled by default).
+- Native command surfaces are primary:
+  - Claude: `/gmd:*`
+  - Codex: `$gmd-*`
+- Canonical alias mode (`gmd:<action>`) is advanced and opt-in only (off by default).
 - On collisions, native commands take precedence and alias routing warns.
-- Codex-native surface is strict `$gmd-*` only.
-- Unmapped Codex native commands hard-fail with a clear error.
 
-Examples:
-- Claude-native: `/gmd:campaign-progress`
-- Codex-native: `$gmd-campaign-progress`
-- Canonical alias (with alias mode enabled): `gmd:campaign.progress`
+#### Which command style should I use?
+
+| Situation | Use This | Example |
+|-----------|----------|---------|
+| Default Claude workflow | Claude-native command | `/gmd:campaign-progress` |
+| Codex workflow | Codex-native command | `$gmd-campaign-progress` |
+| Cross-assistant canonical testing (advanced) | Alias mode command (opt-in) | `gmd:campaign.progress` |
+
+Provider appendix:
+- Claude-native examples: see Core Workflow + Session Management commands below.
+- Codex-native examples: use `$gmd-*` equivalents for the same actions (for example `$gmd-campaign-progress`, `$gmd-resume-work`).
+- Alias mode: enable adapter alias mode explicitly in config before using `gmd:<action>`.
+
+#### Error Contract Reference
+
+| Code | Meaning | Typical remediation |
+|------|---------|---------------------|
+| `UNKNOWN_CODEX_COMMAND` | Unmapped native Codex command | Use a supported `$gmd-*` command |
+| `SCAFFOLD_PROVIDER_INACTIVE` | Scaffold provider is disabled by config | Enable `adapters.scaffolds.<provider>=true` |
+| `SCAFFOLD_CAPABILITY_UNSUPPORTED` | Native scaffold command not supported in scaffold map | Use supported scaffold command or extend provider map |
 
 Codex command sweep:
 
@@ -178,6 +193,9 @@ Scaffold conformance coverage:
 - Validates Gemini/OpenCode/Mistral scaffold provider registration and minimal command routing.
 - Verifies inactive-by-default behavior returns structured diagnostics (`SCAFFOLD_PROVIDER_INACTIVE`).
 - Verifies unsupported scaffold native commands return structured capability-gap diagnostics (`SCAFFOLD_CAPABILITY_UNSUPPORTED`).
+
+Validation runbook (operator quick checks + maintainer release checks):
+- `docs/runbooks/validation.md`
 
 ### Core Workflow
 
