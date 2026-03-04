@@ -222,7 +222,7 @@ Validation runbook (operator quick checks + maintainer release checks):
 | `table-enrichment` | `run <campaign>`, `status`, `validate` | `/gmd:table-enrichment status` |
 | `email-generation` | `create-template`, `generate <company>`, `bulk-generate <segment>`, `iterate` | `/gmd:email-generation bulk-generate fintech` |
 | `copy-feedback` | `<company or person>` | `/gmd:copy-feedback "Jane Smith at Acme"` |
-| `hubspot-campaign` | `create <campaign>`, `list`, `get <campaign>`, `set-state <campaign> <state>`, `link-id <campaign> <hubspot_id>`, `update <campaign>`, `approve <campaign> --by <reviewer>`, `approval-status <campaign>`, `preflight <campaign>`, `launch <campaign>`, `results <campaign> [--file <results.json>]` | `/gmd:hubspot-campaign create q2-pipeline` |
+| `hubspot-campaign` | `create <campaign>`, `list`, `get <campaign>`, `set-state <campaign> <state>`, `link-id <campaign> <hubspot_id>`, `update <campaign>`, `approve <campaign> --by <reviewer>`, `approval-status <campaign>`, `preflight <campaign>`, `launch <campaign>`, `results <campaign> [--file <results.json>]`, `sync <campaign> [--hubspot-id <id>]` | `/gmd:hubspot-campaign create q2-pipeline` |
 | `crm-connect` | `preview`, `import`, `status` | `/gmd:crm-connect preview` |
 | `segmentation` | `create`, `assign`, `review`, `auto` | `/gmd:segmentation auto` |
 | `run-instantly` | `prepare <campaign>`, `upload <campaign>`, `verify <campaign>`, `results <campaign>` | `/gmd:run-instantly prepare q1-fintech` |

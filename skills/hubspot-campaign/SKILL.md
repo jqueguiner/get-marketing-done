@@ -2,7 +2,7 @@
 name: hubspot-campaign
 description: HubSpot campaign foundation commands. Create, inspect, and update campaign lifecycle metadata before preflight/launch phases.
 allowed-tools: Read, Bash
-argument-hint: "[create <campaign> [--segment <segment>] [--owner <owner>] | list | get <campaign> | set-state <campaign> <state> | link-id <campaign> <hubspot_id> | update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>] | approve <campaign> --by <reviewer> [--notes <text>] | approval-status <campaign> | preflight <campaign> | launch <campaign> | results <campaign> [--file <results.json>]]"
+argument-hint: "[create <campaign> [--segment <segment>] [--owner <owner>] | list | get <campaign> | set-state <campaign> <state> | link-id <campaign> <hubspot_id> | update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>] | approve <campaign> --by <reviewer> [--notes <text>] | approval-status <campaign> | preflight <campaign> | launch <campaign> | results <campaign> [--file <results.json>] | sync <campaign> [--hubspot-id <id>]]"
 ---
 
 # HubSpot Campaign (Foundation)
@@ -106,6 +106,16 @@ node scripts/marketing-tools.js hubspot-campaign results <campaign> [--file <res
 
 - With `--file`, ingests metrics into local DB and marks lifecycle `completed`.
 - Without `--file`, returns latest stored results snapshot.
+
+### 12) Sync
+
+```bash
+node scripts/marketing-tools.js hubspot-campaign sync <campaign> [--hubspot-id <id>]
+```
+
+- Validates HubSpot auth and campaign metadata readiness.
+- If `--hubspot-id` is provided, links it during sync.
+- Returns structured sync status (`HUBSPOT_SYNC_OK`, `HUBSPOT_SYNC_PENDING_ID`, or `HUBSPOT_SYNC_BLOCKED`).
 
 ## Notes
 

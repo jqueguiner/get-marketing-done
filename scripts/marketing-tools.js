@@ -904,6 +904,83 @@ function evaluateHubspotPreflight(campaignName) {
   };
 }
 
+function evaluateHubspotSync(campaignName, opts) {
+  var options = opts || {};
+  var remediation = [];
+  var checks = [];
+  var campaign = getHubspotCampaignRecord(campaignName);
+  var token = process.env.HUBSPOT_ACCESS_TOKEN || (readJSON(CONFIG_PATH) || {}).hubspot_access_token || '';
+  var targetId = options.hubspotId || (campaign && campaign.hubspot_campaign_id) || null;
+
+  checks.push({
+    check: 'hubspot_campaign_shell_exists',
+    pass: Boolean(campaign),
+    severity: 'blocker',
+    detail: campaign ? 'campaign shell found' : 'missing campaign shell'
+  });
+  checks.push({
+    check: 'hubspot_auth_present',
+    pass: Boolean(token),
+    severity: 'blocker',
+    detail: token ? 'token configured' : 'HUBSPOT_ACCESS_TOKEN missing'
+  });
+  checks.push({
+    check: 'campaign_owner_set',
+    pass: Boolean(campaign && campaign.owner),
+    severity: 'blocker',
+    detail: campaign && campaign.owner ? campaign.owner : 'owner_missing'
+  });
+  checks.push({
+    check: 'campaign_segment_set',
+    pass: Boolean(campaign && campaign.audience_segment),
+    severity: 'blocker',
+    detail: campaign && campaign.audience_segment ? campaign.audience_segment : 'segment_missing'
+  });
+
+  var failed = checks.filter(function(c) { return !c.pass; });
+  if (failed.length > 0) {
+    remediation.push('Set HubSpot token via config-set hubspot_access_token or env HUBSPOT_ACCESS_TOKEN.');
+    remediation.push('Create campaign shell with owner and segment metadata.');
+    remediation.push('Re-run sync after blockers are resolved.');
+    return {
+      campaign: campaignName,
+      status: 'blocked',
+      code: 'HUBSPOT_SYNC_BLOCKED',
+      checks: checks,
+      failed_checks: failed,
+      remediation: remediation
+    };
+  }
+
+  if (options.hubspotId) {
+    dbPassthrough('hubspot-campaign-update', ['--name', campaignName, '--hubspot-id', options.hubspotId]);
+  }
+
+  var latest = getHubspotCampaignRecord(campaignName);
+  if (!targetId) {
+    return {
+      campaign: campaignName,
+      status: 'needs_link',
+      code: 'HUBSPOT_SYNC_PENDING_ID',
+      checks: checks,
+      failed_checks: [],
+      remediation: ['Provide --hubspot-id <id> or run link-id before launch synchronization.'],
+      hubspot_campaign: latest
+    };
+  }
+
+  return {
+    campaign: campaignName,
+    status: 'synced',
+    code: 'HUBSPOT_SYNC_OK',
+    checks: checks,
+    failed_checks: [],
+    remediation: [],
+    hubspot_campaign: latest,
+    hubspot_campaign_id: targetId
+  };
+}
+
 function hubspotCampaign(args) {
   var parts = Array.isArray(args) ? args.slice() : [];
   var mode = parts[0] || 'list';
@@ -1009,6 +1086,11 @@ function hubspotCampaign(args) {
     };
   }
 
+  if (mode === 'sync') {
+    if (!name) return { error: 'Usage: hubspot-campaign sync <campaign> [--hubspot-id <id>]' };
+    return evaluateHubspotSync(name, { hubspotId: flags['--hubspot-id'] || null });
+  }
+
   return {
     error: 'Unknown hubspot-campaign mode: ' + mode,
     usage: [
@@ -1022,7 +1104,8 @@ function hubspotCampaign(args) {
       'hubspot-campaign approval-status <campaign>',
       'hubspot-campaign preflight <campaign>',
       'hubspot-campaign launch <campaign>',
-      'hubspot-campaign results <campaign> [--file <results.json>]'
+      'hubspot-campaign results <campaign> [--file <results.json>]',
+      'hubspot-campaign sync <campaign> [--hubspot-id <id>]'
     ]
   };
 }

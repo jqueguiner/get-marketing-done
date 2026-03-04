@@ -12,10 +12,11 @@ const { spawnSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const DB_PATH = path.join(ROOT, 'data', 'gtm.db');
 
-function runNode(args) {
+function runNode(args, envOverride) {
   const r = spawnSync('node', [path.join(ROOT, 'scripts', 'marketing-tools.js')].concat(args), {
     cwd: ROOT,
-    encoding: 'utf8'
+    encoding: 'utf8',
+    env: Object.assign({}, process.env, envOverride || {})
   });
   const out = (r.stdout || '').trim();
   const err = (r.stderr || '').trim();
@@ -41,6 +42,14 @@ function main() {
 
   const checks = [];
   const failures = [];
+  const configPath = path.join(ROOT, 'config.json');
+  let configTokenPresent = false;
+  try {
+    const cfg = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    configTokenPresent = Boolean(cfg && cfg.hubspot_access_token);
+  } catch (_) {
+    configTokenPresent = false;
+  }
 
   function record(check, pass, detail) {
     const item = { check, pass, detail: detail || null };
@@ -77,6 +86,22 @@ function main() {
     record('hubspot_id_link_persists',
       linked.json && linked.json.hubspot_campaign_id === 'HS-123',
       linked.json && linked.json.hubspot_campaign_id
+    );
+
+    if (configTokenPresent) {
+      record('sync_blocks_without_auth', true, 'skipped_config_has_token');
+    } else {
+      const syncNoAuth = runNode(['hubspot-campaign', 'sync', campaign], { HUBSPOT_ACCESS_TOKEN: '' });
+      record('sync_blocks_without_auth',
+        syncNoAuth.json && syncNoAuth.json.code === 'HUBSPOT_SYNC_BLOCKED',
+        syncNoAuth.json && syncNoAuth.json.code
+      );
+    }
+
+    const syncWithAuth = runNode(['hubspot-campaign', 'sync', campaign], { HUBSPOT_ACCESS_TOKEN: 'token-test' });
+    record('sync_succeeds_with_auth_and_linked_id',
+      syncWithAuth.json && syncWithAuth.json.code === 'HUBSPOT_SYNC_OK',
+      syncWithAuth.json && syncWithAuth.json.code
     );
 
     const resultsMissing = runNode(['hubspot-campaign', 'results', campaign]);
