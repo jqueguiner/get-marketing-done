@@ -24,7 +24,7 @@ def get_db():
     return conn
 
 
-def init_db():
+def init_db(verbose=False):
     conn = get_db()
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS companies (
@@ -123,6 +123,20 @@ def init_db():
             fetched_at TEXT DEFAULT (datetime('now'))
         );
 
+        CREATE TABLE IF NOT EXISTS hubspot_campaigns (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            campaign_name TEXT UNIQUE NOT NULL,
+            audience_segment TEXT,
+            owner TEXT,
+            hubspot_campaign_id TEXT,
+            lifecycle_state TEXT DEFAULT 'draft' CHECK(
+                lifecycle_state IN ('draft', 'configured', 'preflight_ready', 'launched', 'completed', 'archived')
+            ),
+            notes TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now'))
+        );
+
         CREATE TABLE IF NOT EXISTS segments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
@@ -144,10 +158,12 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_datapoints_company ON datapoints(company_id);
         CREATE INDEX IF NOT EXISTS idx_emails_campaign ON emails(campaign_id);
         CREATE INDEX IF NOT EXISTS idx_emails_company ON emails(company_id);
+        CREATE INDEX IF NOT EXISTS idx_hubspot_campaigns_state ON hubspot_campaigns(lifecycle_state);
     """)
     conn.commit()
     conn.close()
-    print("Database initialized at", DB_PATH)
+    if verbose:
+        print("Database initialized at", DB_PATH)
 
 
 def add_companies(source, reference=None, file_path=None, criteria=None):
@@ -604,6 +620,117 @@ def campaign_results(campaign):
     conn.close()
 
 
+def hubspot_campaign_create(name, segment=None, owner=None):
+    """Create a HubSpot campaign shell."""
+    if not name:
+        print(json.dumps({"error": "campaign name is required"}))
+        return
+
+    conn = get_db()
+    init_db()
+    conn.execute("""
+        INSERT OR IGNORE INTO hubspot_campaigns (campaign_name, audience_segment, owner)
+        VALUES (?, ?, ?)
+    """, (name, segment, owner))
+    row = conn.execute(
+        "SELECT * FROM hubspot_campaigns WHERE campaign_name = ?",
+        (name,)
+    ).fetchone()
+    conn.commit()
+    conn.close()
+    print(json.dumps({"created": True, "campaign": dict(row)}, indent=2, default=str))
+
+
+def hubspot_campaign_list():
+    """List HubSpot campaign shells."""
+    conn = get_db()
+    init_db()
+    rows = conn.execute("""
+        SELECT * FROM hubspot_campaigns
+        ORDER BY updated_at DESC, campaign_name ASC
+    """).fetchall()
+    conn.close()
+    print(json.dumps([dict(r) for r in rows], indent=2, default=str))
+
+
+def hubspot_campaign_get(name):
+    """Get one HubSpot campaign shell."""
+    if not name:
+        print(json.dumps({"error": "campaign name is required"}))
+        return
+    conn = get_db()
+    init_db()
+    row = conn.execute(
+        "SELECT * FROM hubspot_campaigns WHERE campaign_name = ?",
+        (name,)
+    ).fetchone()
+    conn.close()
+    if not row:
+        print(json.dumps({"error": f"HubSpot campaign '{name}' not found"}))
+        return
+    print(json.dumps(dict(row), indent=2, default=str))
+
+
+def hubspot_campaign_update(name, state=None, hubspot_id=None, segment=None, owner=None, notes=None):
+    """Update mutable HubSpot campaign shell fields."""
+    if not name:
+        print(json.dumps({"error": "campaign name is required"}))
+        return
+
+    allowed_states = {'draft', 'configured', 'preflight_ready', 'launched', 'completed', 'archived'}
+    if state and state not in allowed_states:
+        print(json.dumps({"error": f"Invalid lifecycle state: {state}", "allowed_states": sorted(allowed_states)}))
+        return
+
+    conn = get_db()
+    init_db()
+    exists = conn.execute(
+        "SELECT id FROM hubspot_campaigns WHERE campaign_name = ?",
+        (name,)
+    ).fetchone()
+    if not exists:
+        conn.close()
+        print(json.dumps({"error": f"HubSpot campaign '{name}' not found"}))
+        return
+
+    updates = []
+    params = []
+    if state:
+        updates.append("lifecycle_state = ?")
+        params.append(state)
+    if hubspot_id is not None:
+        updates.append("hubspot_campaign_id = ?")
+        params.append(hubspot_id)
+    if segment is not None:
+        updates.append("audience_segment = ?")
+        params.append(segment)
+    if owner is not None:
+        updates.append("owner = ?")
+        params.append(owner)
+    if notes is not None:
+        updates.append("notes = ?")
+        params.append(notes)
+
+    if not updates:
+        conn.close()
+        print(json.dumps({"updated": False, "reason": "no update fields provided"}))
+        return
+
+    updates.append("updated_at = datetime('now')")
+    params.append(name)
+    conn.execute(
+        "UPDATE hubspot_campaigns SET " + ", ".join(updates) + " WHERE campaign_name = ?",
+        tuple(params)
+    )
+    row = conn.execute(
+        "SELECT * FROM hubspot_campaigns WHERE campaign_name = ?",
+        (name,)
+    ).fetchone()
+    conn.commit()
+    conn.close()
+    print(json.dumps({"updated": True, "campaign": dict(row)}, indent=2, default=str))
+
+
 def export_data(campaign, format="csv", output=None):
     """Export enriched data."""
     conn = get_db()
@@ -822,7 +949,7 @@ def bulk_assign_segments(file_path):
 
 
 COMMANDS = {
-    "init": lambda args: init_db(),
+    "init": lambda args: init_db(verbose=True),
     "add-companies": lambda args: add_companies(
         source=args.get("--source", "manual"),
         reference=args.get("--reference"),
@@ -856,6 +983,23 @@ COMMANDS = {
     "mark-uploaded": lambda args: mark_uploaded(campaign=args.get("--campaign", "")),
     "save-results": lambda args: save_results(campaign=args.get("--campaign", ""), file_path=args.get("--file")),
     "campaign-results": lambda args: campaign_results(campaign=args.get("--campaign", args.get("_positional", ""))),
+    "hubspot-campaign-create": lambda args: hubspot_campaign_create(
+        name=args.get("--name", args.get("_positional", "")),
+        segment=args.get("--segment"),
+        owner=args.get("--owner")
+    ),
+    "hubspot-campaign-list": lambda args: hubspot_campaign_list(),
+    "hubspot-campaign-get": lambda args: hubspot_campaign_get(
+        name=args.get("--name", args.get("_positional", ""))
+    ),
+    "hubspot-campaign-update": lambda args: hubspot_campaign_update(
+        name=args.get("--name", args.get("_positional", "")),
+        state=args.get("--state"),
+        hubspot_id=args.get("--hubspot-id"),
+        segment=args.get("--segment"),
+        owner=args.get("--owner"),
+        notes=args.get("--notes")
+    ),
     "export": lambda args: export_data(
         campaign=args.get("--campaign", ""),
         format=args.get("--format", "csv"),

@@ -15,6 +15,7 @@ const COMMAND_MAP = Object.freeze({
   '/gmd:segmentation': ACTIONS.SEGMENT_CREATE,
   '/gmd:email-generation': ACTIONS.EMAIL_TEMPLATE_CREATE,
   '/gmd:copy-feedback': ACTIONS.COPY_FEEDBACK,
+  '/gmd:hubspot-campaign': ACTIONS.HUBSPOT_CAMPAIGN,
   '/gmd:run-instantly': ACTIONS.OUTREACH_PREPARE,
   '/gmd:update': ACTIONS.TOOL_UPDATE
 });

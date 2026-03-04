@@ -35,6 +35,7 @@ const ACTIONS = Object.freeze({
   EMAIL_BULK: 'email.bulk',
   EMAIL_ITERATE: 'email.iterate',
   COPY_FEEDBACK: 'copy.feedback',
+  HUBSPOT_CAMPAIGN: 'hubspot.campaign',
   OUTREACH_PREPARE: 'outreach.prepare',
   OUTREACH_UPLOAD: 'outreach.upload',
   OUTREACH_VERIFY: 'outreach.verify',

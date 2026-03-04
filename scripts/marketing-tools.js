@@ -751,7 +751,8 @@ var DB_COMMANDS = [
   'campaign-results', 'create-segment', 'define-datapoints', 'enrichment-status',
   'export', 'get-company', 'get-email', 'get-emails', 'list-companies',
   'mark-uploaded', 'save-emails', 'save-results', 'show-datapoints',
-  'update-email', 'validate-enrichment'
+  'update-email', 'validate-enrichment',
+  'hubspot-campaign-create', 'hubspot-campaign-list', 'hubspot-campaign-get', 'hubspot-campaign-update'
 ];
 
 function dbPassthrough(cmd, args) {
@@ -765,6 +766,77 @@ function dbPassthrough(cmd, args) {
   } catch (e) {
     return { error: 'db_manager ' + cmd + ' failed', detail: (e.stderr || e.message || '').trim() };
   }
+}
+
+function parseFlagArgs(args) {
+  var out = {};
+  if (!Array.isArray(args)) return out;
+  for (var i = 0; i < args.length; i += 1) {
+    var token = args[i];
+    if (typeof token !== 'string' || !token.startsWith('--')) continue;
+    var key = token;
+    var next = args[i + 1];
+    if (typeof next === 'string' && !next.startsWith('--')) {
+      out[key] = next;
+      i += 1;
+    } else {
+      out[key] = true;
+    }
+  }
+  return out;
+}
+
+function hubspotCampaign(args) {
+  var parts = Array.isArray(args) ? args.slice() : [];
+  var mode = parts[0] || 'list';
+  var name = parts[1] || '';
+  var flags = parseFlagArgs(parts.slice(2));
+
+  if (mode === 'create') {
+    if (!name) return { error: 'Usage: hubspot-campaign create <campaign> [--segment <segment>] [--owner <owner>]' };
+    var createArgs = ['--name', name];
+    if (flags['--segment']) createArgs.push('--segment', flags['--segment']);
+    if (flags['--owner']) createArgs.push('--owner', flags['--owner']);
+    return dbPassthrough('hubspot-campaign-create', createArgs);
+  }
+
+  if (mode === 'list') return dbPassthrough('hubspot-campaign-list', []);
+
+  if (mode === 'get') {
+    if (!name) return { error: 'Usage: hubspot-campaign get <campaign>' };
+    return dbPassthrough('hubspot-campaign-get', ['--name', name]);
+  }
+
+  if (mode === 'set-state') {
+    if (!name || !parts[2]) return { error: 'Usage: hubspot-campaign set-state <campaign> <state>' };
+    return dbPassthrough('hubspot-campaign-update', ['--name', name, '--state', parts[2]]);
+  }
+
+  if (mode === 'link-id') {
+    if (!name || !parts[2]) return { error: 'Usage: hubspot-campaign link-id <campaign> <hubspot-id>' };
+    return dbPassthrough('hubspot-campaign-update', ['--name', name, '--hubspot-id', parts[2]]);
+  }
+
+  if (mode === 'update') {
+    if (!name) return { error: 'Usage: hubspot-campaign update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>]' };
+    var updateArgs = ['--name', name];
+    if (flags['--segment']) updateArgs.push('--segment', flags['--segment']);
+    if (flags['--owner']) updateArgs.push('--owner', flags['--owner']);
+    if (flags['--notes']) updateArgs.push('--notes', flags['--notes']);
+    return dbPassthrough('hubspot-campaign-update', updateArgs);
+  }
+
+  return {
+    error: 'Unknown hubspot-campaign mode: ' + mode,
+    usage: [
+      'hubspot-campaign create <campaign> [--segment <segment>] [--owner <owner>]',
+      'hubspot-campaign list',
+      'hubspot-campaign get <campaign>',
+      'hubspot-campaign set-state <campaign> <state>',
+      'hubspot-campaign link-id <campaign> <hubspot-id>',
+      'hubspot-campaign update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>]'
+    ]
+  };
 }
 
 // ─── Dispatcher ───
@@ -782,6 +854,7 @@ var COMMANDS = {
   'state-record-metric': function(args) { return stateRecordMetric(args[0], parseFloat(args[1]) || 0, args[2] || 'completed'); },
   'progress':          function()     { return progress(); },
   'verify':            function(args) { return verify(args[0]); },
+  'hubspot-campaign':  function(args) { return hubspotCampaign(args); },
   'pause':             function(args) { return pause(args.join(' ')); },
   'clear-continue':    function()     { return clearContinue(); },
   'config-get':        function(args) { return configGet(args[0]); },
@@ -820,6 +893,7 @@ var ACTION_TO_COMMAND = {
   'email.bulk': 'save-emails',
   'email.iterate': 'update-email',
   'copy.feedback': 'get-email',
+  'hubspot.campaign': 'hubspot-campaign',
   'outreach.prepare': 'init-outreach',
   'outreach.upload': 'mark-uploaded',
   'outreach.verify': 'verify',
