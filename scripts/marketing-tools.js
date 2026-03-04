@@ -11,6 +11,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const {
   routeCommand,
@@ -752,7 +753,8 @@ var DB_COMMANDS = [
   'export', 'get-company', 'get-email', 'get-emails', 'list-companies',
   'mark-uploaded', 'save-emails', 'save-results', 'show-datapoints',
   'update-email', 'validate-enrichment',
-  'hubspot-campaign-create', 'hubspot-campaign-list', 'hubspot-campaign-get', 'hubspot-campaign-update'
+  'hubspot-campaign-create', 'hubspot-campaign-list', 'hubspot-campaign-get', 'hubspot-campaign-update',
+  'copy-approval-set', 'copy-approval-status', 'copy-approval-invalidate'
 ];
 
 function dbPassthrough(cmd, args) {
@@ -784,6 +786,35 @@ function parseFlagArgs(args) {
     }
   }
   return out;
+}
+
+function computeCampaignCopyHash(campaignName) {
+  if (!campaignName) return null;
+  var safe = campaignName.replace(/'/g, "''");
+  var rows = dbQuery(
+    "SELECT subject, body FROM emails e JOIN campaigns cp ON e.campaign_id = cp.id " +
+    "WHERE cp.name = '" + safe + "' ORDER BY e.id ASC"
+  );
+  if (!rows || rows.length === 0) return null;
+  var canonical = rows.map(function(r) {
+    return (r.subject || '') + '\n' + (r.body || '');
+  }).join('\n---\n');
+  return crypto.createHash('sha256').update(canonical).digest('hex');
+}
+
+function getCopyApprovalStatus(campaignName, currentHash) {
+  if (!campaignName) return { approved: false, reason: 'campaign_missing' };
+  var raw = dbPassthrough('copy-approval-status', ['--campaign', campaignName]);
+  if (!raw || raw.error) return { approved: false, reason: 'approval_lookup_failed', detail: raw && raw.error };
+  if (!raw.exists || !raw.is_valid) return { approved: false, reason: 'approval_missing_or_invalid' };
+  if (!currentHash) return { approved: false, reason: 'copy_hash_missing' };
+  if (raw.copy_hash !== currentHash) return { approved: false, reason: 'approval_stale_hash_mismatch' };
+  return {
+    approved: true,
+    approved_by: raw.approved_by,
+    approved_at: raw.approved_at,
+    copy_hash: raw.copy_hash
+  };
 }
 
 function hubspotCampaign(args) {
@@ -826,6 +857,46 @@ function hubspotCampaign(args) {
     return dbPassthrough('hubspot-campaign-update', updateArgs);
   }
 
+  if (mode === 'approve') {
+    if (!name) return { error: 'Usage: hubspot-campaign approve <campaign> --by <reviewer> [--notes <text>]' };
+    var reviewer = flags['--by'];
+    if (!reviewer) return { error: 'Missing --by reviewer for approval.' };
+    var hash = computeCampaignCopyHash(name);
+    if (!hash) return { error: 'No generated emails found for campaign; cannot approve copy yet.', code: 'COPY_NOT_READY' };
+    var setArgs = ['--campaign', name, '--by', reviewer, '--hash', hash];
+    if (flags['--notes']) setArgs.push('--notes', flags['--notes']);
+    return dbPassthrough('copy-approval-set', setArgs);
+  }
+
+  if (mode === 'approval-status') {
+    if (!name) return { error: 'Usage: hubspot-campaign approval-status <campaign>' };
+    var currentHash = computeCampaignCopyHash(name);
+    var status = getCopyApprovalStatus(name, currentHash);
+    status.campaign = name;
+    status.current_copy_hash = currentHash;
+    return status;
+  }
+
+  if (mode === 'launch') {
+    if (!name) return { error: 'Usage: hubspot-campaign launch <campaign>' };
+    var launchHash = computeCampaignCopyHash(name);
+    var approval = getCopyApprovalStatus(name, launchHash);
+    if (!approval.approved) {
+      return {
+        error: 'Copy approval required before HubSpot launch.',
+        code: 'COPY_APPROVAL_REQUIRED',
+        campaign: name,
+        reason: approval.reason,
+        remediation: [
+          'Generate/refresh campaign emails first if missing.',
+          'Run: node scripts/marketing-tools.js hubspot-campaign approve ' + name + ' --by <reviewer>',
+          'Re-run launch after approval-status is approved.'
+        ]
+      };
+    }
+    return dbPassthrough('hubspot-campaign-update', ['--name', name, '--state', 'launched']);
+  }
+
   return {
     error: 'Unknown hubspot-campaign mode: ' + mode,
     usage: [
@@ -834,7 +905,10 @@ function hubspotCampaign(args) {
       'hubspot-campaign get <campaign>',
       'hubspot-campaign set-state <campaign> <state>',
       'hubspot-campaign link-id <campaign> <hubspot-id>',
-      'hubspot-campaign update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>]'
+      'hubspot-campaign update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>]',
+      'hubspot-campaign approve <campaign> --by <reviewer> [--notes <text>]',
+      'hubspot-campaign approval-status <campaign>',
+      'hubspot-campaign launch <campaign>'
     ]
   };
 }

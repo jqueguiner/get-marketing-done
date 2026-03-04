@@ -137,6 +137,20 @@ def init_db(verbose=False):
             updated_at TEXT DEFAULT (datetime('now'))
         );
 
+        CREATE TABLE IF NOT EXISTS campaign_copy_approvals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            campaign_name TEXT NOT NULL,
+            copy_hash TEXT NOT NULL,
+            approved_by TEXT NOT NULL,
+            notes TEXT,
+            is_valid INTEGER DEFAULT 1,
+            approved_at TEXT DEFAULT (datetime('now')),
+            invalidated_at TEXT,
+            invalidation_reason TEXT,
+            created_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(campaign_name)
+        );
+
         CREATE TABLE IF NOT EXISTS segments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
@@ -159,6 +173,7 @@ def init_db(verbose=False):
         CREATE INDEX IF NOT EXISTS idx_emails_campaign ON emails(campaign_id);
         CREATE INDEX IF NOT EXISTS idx_emails_company ON emails(company_id);
         CREATE INDEX IF NOT EXISTS idx_hubspot_campaigns_state ON hubspot_campaigns(lifecycle_state);
+        CREATE INDEX IF NOT EXISTS idx_copy_approvals_campaign ON campaign_copy_approvals(campaign_name);
     """)
     conn.commit()
     conn.close()
@@ -544,8 +559,9 @@ def update_email(company, file_path):
         data = json.load(f)
 
     row = conn.execute("""
-        SELECT e.id FROM emails e
+        SELECT e.id, cp.name as campaign_name FROM emails e
         JOIN companies c ON e.company_id = c.id
+        JOIN campaigns cp ON e.campaign_id = cp.id
         WHERE c.name LIKE ?
         ORDER BY e.updated_at DESC LIMIT 1
     """, (f"%{company}%",)).fetchone()
@@ -559,9 +575,19 @@ def update_email(company, file_path):
         UPDATE emails SET subject = ?, body = ?, version = version + 1, updated_at = datetime('now')
         WHERE id = ?
     """, (data.get("subject"), data.get("body"), row["id"]))
+
+    # Copy changes automatically invalidate campaign approval artifacts.
+    conn.execute("""
+        UPDATE campaign_copy_approvals
+        SET is_valid = 0,
+            invalidated_at = datetime('now'),
+            invalidation_reason = 'email_copy_updated'
+        WHERE campaign_name = ?
+    """, (row["campaign_name"],))
+
     conn.commit()
     conn.close()
-    print(json.dumps({"updated": True, "company": company}))
+    print(json.dumps({"updated": True, "company": company, "campaign": row["campaign_name"], "approval_invalidated": True}))
 
 
 def mark_uploaded(campaign):
@@ -729,6 +755,81 @@ def hubspot_campaign_update(name, state=None, hubspot_id=None, segment=None, own
     conn.commit()
     conn.close()
     print(json.dumps({"updated": True, "campaign": dict(row)}, indent=2, default=str))
+
+
+def copy_approval_set(campaign_name, approved_by, copy_hash, notes=None):
+    """Upsert copy approval for a campaign."""
+    if not campaign_name or not approved_by or not copy_hash:
+        print(json.dumps({"error": "campaign_name, approved_by, and copy_hash are required"}))
+        return
+
+    conn = get_db()
+    init_db()
+    conn.execute("""
+        INSERT INTO campaign_copy_approvals (campaign_name, copy_hash, approved_by, notes, is_valid, approved_at, invalidated_at, invalidation_reason)
+        VALUES (?, ?, ?, ?, 1, datetime('now'), NULL, NULL)
+        ON CONFLICT(campaign_name) DO UPDATE SET
+            copy_hash = excluded.copy_hash,
+            approved_by = excluded.approved_by,
+            notes = excluded.notes,
+            is_valid = 1,
+            approved_at = datetime('now'),
+            invalidated_at = NULL,
+            invalidation_reason = NULL
+    """, (campaign_name, copy_hash, approved_by, notes))
+    row = conn.execute(
+        "SELECT * FROM campaign_copy_approvals WHERE campaign_name = ?",
+        (campaign_name,)
+    ).fetchone()
+    conn.commit()
+    conn.close()
+    print(json.dumps({"approved": True, "approval": dict(row)}, indent=2, default=str))
+
+
+def copy_approval_status(campaign_name):
+    """Return copy approval status."""
+    if not campaign_name:
+        print(json.dumps({"error": "campaign_name is required"}))
+        return
+    conn = get_db()
+    init_db()
+    row = conn.execute(
+        "SELECT * FROM campaign_copy_approvals WHERE campaign_name = ?",
+        (campaign_name,)
+    ).fetchone()
+    conn.close()
+    if not row:
+        print(json.dumps({"campaign_name": campaign_name, "exists": False, "is_valid": False}))
+        return
+    out = dict(row)
+    out["exists"] = True
+    print(json.dumps(out, indent=2, default=str))
+
+
+def copy_approval_invalidate(campaign_name, reason):
+    """Invalidate copy approval for campaign."""
+    if not campaign_name:
+        print(json.dumps({"error": "campaign_name is required"}))
+        return
+    conn = get_db()
+    init_db()
+    conn.execute("""
+        UPDATE campaign_copy_approvals
+        SET is_valid = 0,
+            invalidated_at = datetime('now'),
+            invalidation_reason = ?
+        WHERE campaign_name = ?
+    """, (reason or 'copy_changed', campaign_name))
+    row = conn.execute(
+        "SELECT * FROM campaign_copy_approvals WHERE campaign_name = ?",
+        (campaign_name,)
+    ).fetchone()
+    conn.commit()
+    conn.close()
+    if not row:
+        print(json.dumps({"campaign_name": campaign_name, "invalidated": False, "reason": "approval_not_found"}))
+        return
+    print(json.dumps({"campaign_name": campaign_name, "invalidated": True, "approval": dict(row)}, indent=2, default=str))
 
 
 def export_data(campaign, format="csv", output=None):
@@ -999,6 +1100,19 @@ COMMANDS = {
         segment=args.get("--segment"),
         owner=args.get("--owner"),
         notes=args.get("--notes")
+    ),
+    "copy-approval-set": lambda args: copy_approval_set(
+        campaign_name=args.get("--campaign", ""),
+        approved_by=args.get("--by", ""),
+        copy_hash=args.get("--hash", ""),
+        notes=args.get("--notes")
+    ),
+    "copy-approval-status": lambda args: copy_approval_status(
+        campaign_name=args.get("--campaign", args.get("_positional", ""))
+    ),
+    "copy-approval-invalidate": lambda args: copy_approval_invalidate(
+        campaign_name=args.get("--campaign", ""),
+        reason=args.get("--reason")
     ),
     "export": lambda args: export_data(
         campaign=args.get("--campaign", ""),

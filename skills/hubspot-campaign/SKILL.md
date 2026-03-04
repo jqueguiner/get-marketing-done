@@ -2,7 +2,7 @@
 name: hubspot-campaign
 description: HubSpot campaign foundation commands. Create, inspect, and update campaign lifecycle metadata before preflight/launch phases.
 allowed-tools: Read, Bash
-argument-hint: "[create <campaign> [--segment <segment>] [--owner <owner>] | list | get <campaign> | set-state <campaign> <state> | link-id <campaign> <hubspot_id> | update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>]]"
+argument-hint: "[create <campaign> [--segment <segment>] [--owner <owner>] | list | get <campaign> | set-state <campaign> <state> | link-id <campaign> <hubspot_id> | update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>] | approve <campaign> --by <reviewer> [--notes <text>] | approval-status <campaign> | launch <campaign>]"
 ---
 
 # HubSpot Campaign (Foundation)
@@ -65,7 +65,31 @@ node scripts/marketing-tools.js hubspot-campaign update <campaign> [--segment <s
 
 Updates non-launch metadata fields.
 
+### 7) Approve copy (required before launch)
+
+```bash
+node scripts/marketing-tools.js hubspot-campaign approve <campaign> --by <reviewer> [--notes <text>]
+```
+
+Creates/refreshes copy approval artifact from current campaign email content hash.
+
+### 8) Check approval status
+
+```bash
+node scripts/marketing-tools.js hubspot-campaign approval-status <campaign>
+```
+
+Shows whether approval is valid and hash-aligned with current copy.
+
+### 9) Launch (gated)
+
+```bash
+node scripts/marketing-tools.js hubspot-campaign launch <campaign>
+```
+
+Launch is blocked unless copy approval is valid for current campaign copy.
+
 ## Notes
 
-- This is foundation-only in Phase 9: preflight and launch blocking logic is delivered in later phases.
-- Copy approval and mandatory launch gating are intentionally not bypassed by this skill.
+- This remains a foundation slice: full HubSpot API preflight/sync behavior is expanded in later phases.
+- Any email copy edit invalidates prior campaign copy approval automatically.
