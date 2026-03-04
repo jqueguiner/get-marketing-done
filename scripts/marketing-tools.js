@@ -751,7 +751,7 @@ var DB_COMMANDS = [
   'add-companies', 'add-contacts', 'add-datapoints', 'assign-segment',
   'campaign-results', 'create-segment', 'define-datapoints', 'enrichment-status',
   'export', 'get-company', 'get-email', 'get-emails', 'list-companies',
-  'mark-uploaded', 'save-emails', 'save-results', 'show-datapoints',
+  'mark-uploaded', 'save-emails', 'campaign-ensure', 'save-results', 'show-datapoints',
   'update-email', 'validate-enrichment',
   'hubspot-campaign-create', 'hubspot-campaign-list', 'hubspot-campaign-get', 'hubspot-campaign-update',
   'copy-approval-set', 'copy-approval-status', 'copy-approval-invalidate'
@@ -983,6 +983,32 @@ function hubspotCampaign(args) {
     return dbPassthrough('hubspot-campaign-update', ['--name', name, '--state', 'launched']);
   }
 
+  if (mode === 'results') {
+    if (!name) return { error: 'Usage: hubspot-campaign results <campaign> [--file <results.json>]' };
+    var ingestion = null;
+    if (flags['--file']) {
+      dbPassthrough('campaign-ensure', ['--campaign', name]);
+      ingestion = dbPassthrough('save-results', ['--campaign', name, '--file', flags['--file']]);
+      if (!ingestion || ingestion.error) {
+        return {
+          error: 'Failed to ingest HubSpot campaign results',
+          code: 'HUBSPOT_RESULTS_INGEST_FAILED',
+          campaign: name,
+          detail: ingestion
+        };
+      }
+      dbPassthrough('hubspot-campaign-update', ['--name', name, '--state', 'completed']);
+    }
+    var metrics = dbPassthrough('campaign-results', ['--campaign', name]);
+    var hubspot = getHubspotCampaignRecord(name);
+    return {
+      campaign: name,
+      ingestion: ingestion,
+      hubspot_campaign: hubspot,
+      results: metrics
+    };
+  }
+
   return {
     error: 'Unknown hubspot-campaign mode: ' + mode,
     usage: [
@@ -995,7 +1021,8 @@ function hubspotCampaign(args) {
       'hubspot-campaign approve <campaign> --by <reviewer> [--notes <text>]',
       'hubspot-campaign approval-status <campaign>',
       'hubspot-campaign preflight <campaign>',
-      'hubspot-campaign launch <campaign>'
+      'hubspot-campaign launch <campaign>',
+      'hubspot-campaign results <campaign> [--file <results.json>]'
     ]
   };
 }

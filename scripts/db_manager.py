@@ -512,6 +512,20 @@ def save_emails(campaign, file_path):
     print(json.dumps({"campaign": campaign, "emails_saved": saved}))
 
 
+def campaign_ensure(campaign):
+    """Ensure a campaign row exists in campaigns table."""
+    if not campaign:
+        print(json.dumps({"error": "campaign is required"}))
+        return
+    conn = get_db()
+    init_db()
+    conn.execute("INSERT OR IGNORE INTO campaigns (name) VALUES (?)", (campaign,))
+    row = conn.execute("SELECT * FROM campaigns WHERE name = ?", (campaign,)).fetchone()
+    conn.commit()
+    conn.close()
+    print(json.dumps({"ensured": True, "campaign": dict(row)}, indent=2, default=str))
+
+
 def get_emails(campaign, status=None):
     """Get emails for a campaign."""
     conn = get_db()
@@ -1078,6 +1092,7 @@ COMMANDS = {
         strict="--strict" in args
     ),
     "save-emails": lambda args: save_emails(campaign=args.get("--campaign", ""), file_path=args.get("--file")),
+    "campaign-ensure": lambda args: campaign_ensure(campaign=args.get("--campaign", args.get("_positional", ""))),
     "get-emails": lambda args: get_emails(campaign=args.get("--campaign", ""), status=args.get("--status")),
     "get-email": lambda args: get_email(company=args.get("--company", "")),
     "update-email": lambda args: update_email(company=args.get("--company", ""), file_path=args.get("--file")),
