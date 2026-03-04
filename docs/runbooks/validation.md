@@ -81,6 +81,7 @@ node scripts/verify_adapter_parity.js --include-scaffolds
 ```bash
 node scripts/verify_hubspot_launch_gate.js
 node scripts/verify_hubspot_sync_regression.js
+node scripts/verify_hubspot_suite.js
 ```
 
 Release policy:

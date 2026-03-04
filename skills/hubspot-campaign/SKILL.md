@@ -2,7 +2,7 @@
 name: hubspot-campaign
 description: HubSpot campaign foundation commands. Create, inspect, and update campaign lifecycle metadata before preflight/launch phases.
 allowed-tools: Read, Bash
-argument-hint: "[create <campaign> [--segment <segment>] [--owner <owner>] | list | get <campaign> | set-state <campaign> <state> | link-id <campaign> <hubspot_id> | update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>] | approve <campaign> --by <reviewer> [--notes <text>] | approval-status <campaign> | preflight <campaign> | launch <campaign> | results <campaign> [--file <results.json>] | sync <campaign> [--hubspot-id <id>]]"
+argument-hint: "[create <campaign> [--segment <segment>] [--owner <owner>] | list | get <campaign> | set-state <campaign> <state> | link-id <campaign> <hubspot_id> | update <campaign> [--segment <segment>] [--owner <owner>] [--notes <text>] | approve <campaign> --by <reviewer> [--notes <text>] | approval-status <campaign> | preflight <campaign> | preflight-report <campaign> [--out <path>] | launch <campaign> | results <campaign> [--file <results.json>] | sync <campaign> [--hubspot-id <id>]]"
 ---
 
 # HubSpot Campaign (Foundation)
@@ -97,6 +97,14 @@ node scripts/marketing-tools.js hubspot-campaign preflight <campaign>
 
 Preflight verifies campaign shell/state, owner/segment metadata, generated emails, and valid copy approval.
 If checks pass, lifecycle moves to `preflight_ready`.
+
+### 10b) Preflight report artifact
+
+```bash
+node scripts/marketing-tools.js hubspot-campaign preflight-report <campaign> [--out <path>]
+```
+
+Writes a markdown preflight report containing checks, failures, and remediation steps.
 
 ### 11) Results
 

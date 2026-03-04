@@ -32,13 +32,13 @@
 ## v1.1 Requirements
 
 ### HubSpot Campaign Execution
-- [ ] **HUB-01**: Operator can create and manage HubSpot campaign objects through GMD commands.
+- [x] **HUB-01**: Operator can create and manage HubSpot campaign objects through GMD commands.
 - [ ] **HUB-02**: Operator can run preflight checks and launch eligible HubSpot campaigns from GMD.
 - [ ] **HUB-03**: Operator can pull HubSpot campaign execution results into local reporting artifacts.
 
 ### Copy Approval and Launch Safety
-- [ ] **CPY-01**: Operator must explicitly approve campaign copy before launch-adjacent actions are allowed.
-- [ ] **CPY-02**: Copy approvals are invalidated automatically when approved copy changes.
+- [x] **CPY-01**: Operator must explicitly approve campaign copy before launch-adjacent actions are allowed.
+- [x] **CPY-02**: Copy approvals are invalidated automatically when approved copy changes.
 - [ ] **SAFE-04**: System blocks launch/publish when required approvals or preflight checks are missing.
 
 ### Verification and Reliability
@@ -63,9 +63,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HUB-01 | Phase 9 | Pending |
-| CPY-01 | Phase 10 | Pending |
-| CPY-02 | Phase 10 | Pending |
+| HUB-01 | Phase 9 | Complete |
+| CPY-01 | Phase 10 | Complete |
+| CPY-02 | Phase 10 | Complete |
 | SAFE-04 | Phase 11 | Pending |
 | HUB-02 | Phase 11 | Pending |
 | QUAL-03 | Phase 12 | Pending |
@@ -79,4 +79,4 @@
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-04 after milestone v1.1 initialization*
+*Last updated: 2026-03-04 after phase 9/10 closeout updates*

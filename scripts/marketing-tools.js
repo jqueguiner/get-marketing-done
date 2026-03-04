@@ -788,6 +788,13 @@ function parseFlagArgs(args) {
   return out;
 }
 
+function safeSlug(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '') || 'campaign';
+}
+
 function computeCampaignCopyHash(campaignName) {
   if (!campaignName) return null;
   var safe = campaignName.replace(/'/g, "''");
@@ -902,6 +909,53 @@ function evaluateHubspotPreflight(campaignName) {
     failed_checks: [],
     remediation: []
   };
+}
+
+function writeHubspotPreflightReport(campaignName, preflight, outPath) {
+  var target = outPath;
+  if (!target) {
+    var reportsDir = path.join(DATA, 'reports');
+    if (!fileExists(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
+    target = path.join(reportsDir, 'hubspot-preflight-' + safeSlug(campaignName) + '.md');
+  }
+
+  var lines = [];
+  lines.push('# HubSpot Preflight Report');
+  lines.push('');
+  lines.push('- Campaign: ' + campaignName);
+  lines.push('- Status: ' + preflight.status);
+  lines.push('- Code: ' + preflight.code);
+  lines.push('- Generated: ' + nowIso());
+  lines.push('');
+  lines.push('## Checks');
+  lines.push('');
+  lines.push('| Check | Pass | Severity | Detail |');
+  lines.push('|-------|------|----------|--------|');
+  (preflight.checks || []).forEach(function(c) {
+    lines.push('| `' + c.check + '` | ' + (c.pass ? 'yes' : 'no') + ' | ' + (c.severity || '') + ' | ' + String(c.detail || '').replace(/\|/g, '\\|') + ' |');
+  });
+  lines.push('');
+  lines.push('## Failed Checks');
+  lines.push('');
+  if (!preflight.failed_checks || preflight.failed_checks.length === 0) {
+    lines.push('- None');
+  } else {
+    preflight.failed_checks.forEach(function(c) {
+      lines.push('- `' + c.check + '` — ' + String(c.detail || 'blocked'));
+    });
+  }
+  lines.push('');
+  lines.push('## Remediation');
+  lines.push('');
+  if (!preflight.remediation || preflight.remediation.length === 0) {
+    lines.push('- None');
+  } else {
+    preflight.remediation.forEach(function(r) { lines.push('- ' + r); });
+  }
+  lines.push('');
+
+  fs.writeFileSync(target, lines.join('\n') + '\n');
+  return target;
 }
 
 function evaluateHubspotSync(campaignName, opts) {
@@ -1046,6 +1100,17 @@ function hubspotCampaign(args) {
     return evaluateHubspotPreflight(name);
   }
 
+  if (mode === 'preflight-report') {
+    if (!name) return { error: 'Usage: hubspot-campaign preflight-report <campaign> [--out <path>]' };
+    var pf = evaluateHubspotPreflight(name);
+    var reportPath = writeHubspotPreflightReport(name, pf, flags['--out'] || null);
+    return {
+      campaign: name,
+      report_path: reportPath,
+      preflight: pf
+    };
+  }
+
   if (mode === 'launch') {
     if (!name) return { error: 'Usage: hubspot-campaign launch <campaign>' };
     var preflight = evaluateHubspotPreflight(name);
@@ -1103,6 +1168,7 @@ function hubspotCampaign(args) {
       'hubspot-campaign approve <campaign> --by <reviewer> [--notes <text>]',
       'hubspot-campaign approval-status <campaign>',
       'hubspot-campaign preflight <campaign>',
+      'hubspot-campaign preflight-report <campaign> [--out <path>]',
       'hubspot-campaign launch <campaign>',
       'hubspot-campaign results <campaign> [--file <results.json>]',
       'hubspot-campaign sync <campaign> [--hubspot-id <id>]'
