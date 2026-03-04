@@ -1,53 +1,61 @@
 # Get Marketing Done
 
 ## What This Is
-Get Marketing Done is a GTM automation system that runs inside coding-assistant environments and drives the full outbound pipeline from company context through campaign results. It combines command skills, local scripts, and persistent campaign memory so each campaign improves the next one instead of restarting from zero. This milestone extends the existing Claude-first implementation into a multi-assistant architecture that also works cleanly with Codex-style workflows and compatible agent ecosystems.
+Get Marketing Done is a GTM automation system that runs inside coding-assistant environments and drives the full outbound pipeline from company context through campaign results. It combines command skills, local scripts, and persistent campaign memory so each campaign improves the next one instead of restarting from zero.
 
 ## Core Value
 Teams can run repeatable outbound campaigns with cumulative context and quality gates, regardless of which supported coding assistant they use.
 
+## Current Milestone: v1.1 HubSpot Campaign Launch Integrity
+
+**Goal:** Ship production-safe HubSpot campaign execution with hard, non-bypass copy approval gates.
+
+**Target features:**
+- HubSpot-native campaign command surface (create/sync/preflight/launch/results)
+- Mandatory copy approval artifacts and invalidation-on-edit behavior
+- Shared launch gate policy that blocks publish without approvals and preflight readiness
+- Deterministic verification scripts for launch and approval contracts
+- Results ingestion/reporting updates for HubSpot campaign outcomes
+
 ## Requirements
 
-### Validated
+### Validated (v1.0 complete)
+- Multi-assistant compatibility foundation (Claude/Codex parity + scaffolds)
+- Cross-adapter state continuity and safety gates
+- Parity and flow validation harnesses
+- Compatibility/migration documentation
 
-- ✓ Installable GTM command system with guided pipeline steps — existing
-- ✓ Persistent campaign state and data storage using SQLite + Markdown — existing
-- ✓ Structured workflows for list building, enrichment, segmentation, and email generation — existing
-- ✓ Manual verification gates before send actions — existing
-- ✓ Dashboard/reporting and session continuity hooks — existing
+### Active (v1.1)
+- [ ] Add HubSpot campaign lifecycle commands with reliable sync/launch semantics
+- [ ] Enforce non-bypass human copy approval before any launch-adjacent action
+- [ ] Keep launch safety policy centralized in shared runtime (no provider-specific bypass)
+- [ ] Add deterministic validators for approval and launch-gate contracts
+- [ ] Preserve existing local-first schemas while adding HubSpot campaign artifacts
 
-### Active
-
-- [ ] Add cross-assistant compatibility layer so core workflows run in Codex-style environments without Claude-specific assumptions
-- [ ] Keep feature parity for existing GTM pipeline commands while adapting execution semantics
-- [ ] Support adapter patterns for Gemini/OpenCode/Mistral-style workflows where feasible without forking business logic
-- [ ] Harden configuration and integration boundaries so provider-specific tokens and permissions remain isolated
-- [ ] Preserve campaign memory and traceability during migration/adaptation work
-
-### Out of Scope
-
-- Native hosted SaaS product with remote multi-tenant backend — local-first architecture remains
-- Fully autonomous campaign sending without human review — violates quality/safety model
-- Rebuilding all workflow logic from scratch per assistant — adapt through shared abstractions
+### Out of Scope (v1.1)
+- Fully autonomous sending without human approval
+- Full ABM orchestration (addressed in future milestone)
+- Social/video generation engine (future milestone)
+- Competitor scanner and announcement intelligence (future milestone)
 
 ## Context
-The repository is a brownfield project with Node installer/hooks and Python operational scripts. Existing commands and data models are implemented and actively used. Current architecture is Claude-first in command naming and hook integration, with portable script backends already present. The immediate work is architectural adaptation and compatibility hardening, not greenfield feature invention.
+The repository is a brownfield Node/Python project with local-first data and existing GTM command workflows. v1.0 completed assistant adaptation. v1.1 now focuses on operational campaign execution integrity through HubSpot and mandatory copy verification.
 
 ## Constraints
 
-- **Compatibility**: Existing Claude command behavior must keep working — current users cannot be broken
-- **Architecture**: Preserve local-first storage (`SQLite + CSV + Markdown`) — avoids platform lock-in
-- **Execution model**: Maintain manual verify gates before send — safeguards outreach quality
-- **Scope control**: Reuse current scripts and schemas where possible — avoid duplicate implementations per assistant
-- **Delivery**: Changes should be incrementally shippable via phased roadmap — minimize migration risk
+- **Safety:** Launch/publish must remain human-gated and auditable
+- **Compatibility:** Existing command flows must remain stable while adding new HubSpot commands
+- **Architecture:** Reuse shared runtime policy and validator patterns from prior phases
+- **Data:** Maintain backward compatibility for local data artifacts
+- **Delivery:** Build incrementally through phase-based execution (09+)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Treat this as brownfield adaptation, not rewrite | Existing pipeline capabilities are already validated | — Pending |
-| Prioritize assistant-agnostic orchestration boundary | Enables Codex/Gemini/OpenCode/Mistral support with shared core logic | — Pending |
-| Keep manual verification as non-negotiable quality gate | Prevents unsafe/low-quality automated outreach | ✓ Good |
+| HubSpot launch capability is first next milestone | Highest immediate operator value after multi-assistant foundation | ✓ Locked |
+| Copy approval is a hard gate, not advisory | Prevents unsafe/unchecked outreach | ✓ Locked |
+| Launch policy remains centralized in shared runtime | Avoids adapter-specific bypass drift | ✓ Locked |
 
 ---
-*Last updated: 2026-03-03 after initialization*
+*Last updated: 2026-03-04 after milestone v1.1 initialization*
